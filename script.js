@@ -2,7 +2,7 @@ const REQUEST_TIMEOUT_MS = 8000;
 const WEATHER_QUERY = [
   "current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m",
   "daily=weather_code,temperature_2m_max,temperature_2m_min",
-  "forecast_days=3",
+  "forecast_days=5",
   "timezone=auto",
 ].join("&");
 const DEFAULT_CITY_QUERY = "Manama";
@@ -52,20 +52,22 @@ const translations = {
     eyebrow: "Live Weather",
     heroTitle: "City Forecast Snapshot",
     intro:
-      "Choose a Gulf capital or search for any city to see current conditions with temperature, humidity, wind, and a plain-language status.",
+      "Choose a Gulf capital, search for a city, or use your location to see current conditions, icons, and a 5-day forecast.",
     capitalLabel: "Quick Gulf capitals",
     capitalPlaceholder: "Select a Gulf capital",
     searchLabel: "Search for a city",
     searchPlaceholder: "Enter a city name",
     searchButton: "Search",
+    locationButton: "Use My Location",
     favoritesTitle: "Favorite Cities",
     saveFavorite: "Save Current City",
     emptyFavorites: "No favorite cities yet.",
     loading: "Loading current weather for {city}...",
+    locating: "Detecting your current location...",
     detailsLabel: "Current weather details",
     humidity: "Humidity",
     windSpeed: "Wind Speed",
-    forecastTitle: "3-Day Forecast",
+    forecastTitle: "5-Day Forecast",
     waiting: "Waiting for data",
     retry: "Try Again",
     footer: "Built by Yaseen Mohamed",
@@ -76,6 +78,9 @@ const translations = {
     alreadyFavorite: "{city} is already in your favorites.",
     savedFavorite: "{city} saved to favorites.",
     removeFavorite: "Remove {city}",
+    currentLocation: "your location",
+    locationDenied: "Location access was denied. Showing the default city instead.",
+    locationUnavailable: "Unable to detect your location. Showing the default city instead.",
   },
   ar: {
     title: "بحث الطقس للمدن",
@@ -85,20 +90,22 @@ const translations = {
     eyebrow: "الطقس المباشر",
     heroTitle: "ملخص طقس المدن",
     intro:
-      "اختر عاصمة خليجية أو ابحث عن أي مدينة لمعرفة الطقس الحالي ودرجة الحرارة والرطوبة وسرعة الرياح ووصف الحالة.",
+      "اختر عاصمة خليجية أو ابحث عن مدينة أو استخدم موقعك الحالي لمعرفة الطقس المباشر والأيقونات وتوقعات 5 أيام.",
     capitalLabel: "عواصم الخليج السريعة",
     capitalPlaceholder: "اختر عاصمة خليجية",
     searchLabel: "ابحث عن مدينة",
     searchPlaceholder: "اكتب اسم مدينة",
     searchButton: "بحث",
+    locationButton: "استخدم موقعي",
     favoritesTitle: "المدن المفضلة",
     saveFavorite: "حفظ المدينة الحالية",
     emptyFavorites: "لا توجد مدن مفضلة بعد.",
     loading: "جارٍ تحميل الطقس الحالي لـ {city}...",
+    locating: "جارٍ تحديد موقعك الحالي...",
     detailsLabel: "تفاصيل الطقس الحالية",
     humidity: "الرطوبة",
     windSpeed: "سرعة الرياح",
-    forecastTitle: "توقعات 3 أيام",
+    forecastTitle: "توقعات 5 أيام",
     waiting: "بانتظار البيانات",
     retry: "حاول مرة أخرى",
     footer: "تم التطوير بواسطة Yaseen Mohamed",
@@ -109,6 +116,9 @@ const translations = {
     alreadyFavorite: "{city} موجودة بالفعل في المفضلة.",
     savedFavorite: "تم حفظ {city} في المفضلة.",
     removeFavorite: "إزالة {city}",
+    currentLocation: "موقعك الحالي",
+    locationDenied: "تم رفض الوصول إلى الموقع. سيتم عرض المدينة الافتراضية بدلًا من ذلك.",
+    locationUnavailable: "تعذر تحديد موقعك. سيتم عرض المدينة الافتراضية بدلًا من ذلك.",
   },
 };
 
@@ -148,6 +158,7 @@ const weatherContent = document.getElementById("weather-content");
 const retryButton = document.getElementById("retry-button");
 const themeToggle = document.getElementById("theme-toggle");
 const languageSelect = document.getElementById("language-select");
+const locationButton = document.getElementById("location-button");
 const saveFavoriteButton = document.getElementById("save-favorite-button");
 const favoritesList = document.getElementById("favorites-list");
 const forecastGrid = document.getElementById("forecast-grid");
@@ -156,6 +167,7 @@ const searchForm = document.getElementById("search-form");
 const searchButton = document.getElementById("search-button");
 const cityInput = document.getElementById("city-input");
 const locationElement = document.getElementById("location");
+const conditionIconElement = document.getElementById("condition-icon");
 const temperatureElement = document.getElementById("temperature");
 const conditionElement = document.getElementById("condition");
 const humidityElement = document.getElementById("humidity");
@@ -191,6 +203,18 @@ function t(key, values = {}) {
 function localizeWeatherCode(code) {
   const condition = weatherCodeMap[code];
   return condition ? condition[currentLanguage] || condition.en : "";
+}
+
+function getWeatherIcon(code) {
+  if (code === 0) return "☀️";
+  if (code === 1 || code === 2) return "🌤️";
+  if (code === 3) return "☁️";
+  if (code === 45 || code === 48) return "🌫️";
+  if ([51, 53, 55, 56, 57].includes(code)) return "🌦️";
+  if ([61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return "🌧️";
+  if ([71, 73, 75, 77, 85, 86].includes(code)) return "❄️";
+  if ([95, 96, 99].includes(code)) return "⛈️";
+  return "🌡️";
 }
 
 function getCapitalLabel(capital) {
@@ -249,6 +273,10 @@ function buildGeocodingEndpoint(cityName) {
   return `https://geocoding-api.open-meteo.com/v1/search?name=${query}&count=1&language=${currentLanguage}&format=json`;
 }
 
+function buildReverseGeocodingEndpoint(latitude, longitude) {
+  return `https://geocoding-api.open-meteo.com/v1/reverse?latitude=${latitude}&longitude=${longitude}&language=${currentLanguage}&format=json`;
+}
+
 function getCapitalByKey(capitalKey) {
   return gulfCapitals[capitalKey];
 }
@@ -282,11 +310,13 @@ function renderForecast(daily) {
 
   forecastGrid.innerHTML = daily.time
     .map((date, index) => {
-      const condition = localizeWeatherCode(daily.weather_code[index]) || t("waiting");
+      const code = daily.weather_code[index];
+      const condition = localizeWeatherCode(code) || t("waiting");
 
       return `
         <article class="forecast-card">
           <span class="forecast-day">${formatForecastDay(date)}</span>
+          <span class="forecast-icon" aria-hidden="true">${getWeatherIcon(code)}</span>
           <strong class="forecast-temp">${Math.round(daily.temperature_2m_max[index])}° / ${Math.round(daily.temperature_2m_min[index])}°</strong>
           <span class="forecast-condition">${condition}</span>
         </article>
@@ -331,6 +361,7 @@ function updateStaticTranslations() {
   cityInput.placeholder = t("searchPlaceholder");
   cityInput.setAttribute("aria-label", t("searchPlaceholder"));
   searchButton.textContent = t("searchButton");
+  locationButton.textContent = t("locationButton");
   favoritesTitleElement.textContent = t("favoritesTitle");
   saveFavoriteButton.textContent = t("saveFavorite");
   forecastTitleElement.textContent = t("forecastTitle");
@@ -356,15 +387,21 @@ function animateLanguageSwitch(language) {
   document.body.classList.add("is-language-switching");
   updateStaticTranslations();
 
+  if (lastRequestedLocation.mode === "capital" && currentResolvedCity?.key) {
+    lastRequestedLocation.label = getCapitalLabel(getCapitalByKey(currentResolvedCity.key));
+  }
+
+  if (lastRequestedLocation.mode === "coords") {
+    lastRequestedLocation.label = t("currentLocation");
+  }
+
   if (currentResolvedCity) {
     if (currentResolvedCity.key) {
       currentResolvedCity.name = getCapitalLabel(getCapitalByKey(currentResolvedCity.key));
-      currentResolvedCity.localizedName = currentResolvedCity.name;
-      locationElement.textContent = currentResolvedCity.name;
-    } else {
-      locationElement.textContent = currentResolvedCity.localizedName || currentResolvedCity.name;
     }
+    locationElement.textContent = currentResolvedCity.name;
     conditionElement.textContent = localizeWeatherCode(currentResolvedCity.weatherCode);
+    conditionIconElement.textContent = getWeatherIcon(currentResolvedCity.weatherCode);
     renderForecast(currentResolvedCity.dailyForecast);
   }
 
@@ -378,12 +415,12 @@ function showWeather(city, data) {
 
   currentResolvedCity = {
     ...city,
-    localizedName: city.name,
     weatherCode: current.weather_code,
     dailyForecast: data.daily,
   };
 
   locationElement.textContent = city.name;
+  conditionIconElement.textContent = getWeatherIcon(current.weather_code);
   temperatureElement.textContent = `${Math.round(current.temperature_2m)}°C`;
   conditionElement.textContent = localizeWeatherCode(current.weather_code) || t("waiting");
   humidityElement.textContent = `${current.relative_humidity_2m}%`;
@@ -429,6 +466,17 @@ async function fetchCityCoordinates(cityName, controller) {
   };
 }
 
+async function fetchLocationName(latitude, longitude, controller) {
+  const payload = await fetchJson(buildReverseGeocodingEndpoint(latitude, longitude), controller);
+
+  if (!payload.results || payload.results.length === 0) {
+    return t("currentLocation");
+  }
+
+  const [result] = payload.results;
+  return [result.name, result.country].filter(Boolean).join(", ");
+}
+
 async function loadWeather(request = lastRequestedLocation) {
   lastRequestedLocation = request;
 
@@ -439,14 +487,31 @@ async function loadWeather(request = lastRequestedLocation) {
   const timeoutId = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
   try {
-    const city =
-      request.mode === "capital"
-        ? {
-            ...getCapitalByKey(request.value),
-            key: request.value,
-            name: getCapitalLabel(getCapitalByKey(request.value)),
-          }
-        : await fetchCityCoordinates(request.value, controller);
+    let city;
+
+    if (request.mode === "capital") {
+      const capital = getCapitalByKey(request.value);
+      city = {
+        ...capital,
+        key: request.value,
+        name: getCapitalLabel(capital),
+      };
+    } else if (request.mode === "coords") {
+      const locationName = await fetchLocationName(
+        request.value.latitude,
+        request.value.longitude,
+        controller
+      );
+
+      city = {
+        name: locationName,
+        latitude: request.value.latitude,
+        longitude: request.value.longitude,
+      };
+      lastRequestedLocation.label = locationName;
+    } else {
+      city = await fetchCityCoordinates(request.value, controller);
+    }
 
     const payload = await fetchJson(buildWeatherEndpoint(city), controller);
 
@@ -460,6 +525,54 @@ async function loadWeather(request = lastRequestedLocation) {
     showError();
   } finally {
     window.clearTimeout(timeoutId);
+  }
+}
+
+function getCurrentPosition() {
+  return new Promise((resolve, reject) => {
+    navigator.geolocation.getCurrentPosition(resolve, reject, {
+      enableHighAccuracy: true,
+      timeout: REQUEST_TIMEOUT_MS,
+      maximumAge: 300000,
+    });
+  });
+}
+
+async function useCurrentLocation({ silentFallback = false } = {}) {
+  if (!("geolocation" in navigator)) {
+    if (!silentFallback) {
+      setStatus(t("locationUnavailable"), true);
+    }
+    return false;
+  }
+
+  try {
+    setStatus(t("locating"));
+    const position = await getCurrentPosition();
+
+    cityInput.value = "";
+    capitalSelect.value = "";
+
+    await loadWeather({
+      mode: "coords",
+      value: {
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+      },
+      label: t("currentLocation"),
+    });
+
+    return true;
+  } catch (error) {
+    console.error("Failed to detect user location:", error);
+
+    if (!silentFallback) {
+      const message =
+        error?.code === 1 ? t("locationDenied") : t("locationUnavailable");
+      setStatus(message, true);
+    }
+
+    return false;
   }
 }
 
@@ -511,6 +624,10 @@ languageSelect.addEventListener("change", () => {
   animateLanguageSwitch(languageSelect.value);
 });
 
+locationButton.addEventListener("click", () => {
+  useCurrentLocation();
+});
+
 saveFavoriteButton.addEventListener("click", () => {
   if (!currentResolvedCity) {
     setStatus(t("saveFirst"), true);
@@ -556,13 +673,21 @@ favoritesList.addEventListener("click", (event) => {
   }
 });
 
-cityInput.value = DEFAULT_CITY_QUERY;
-languageSelect.value = currentLanguage;
-updateStaticTranslations();
-initializeTheme();
+async function initializeApp() {
+  cityInput.value = DEFAULT_CITY_QUERY;
+  languageSelect.value = currentLanguage;
+  updateStaticTranslations();
+  initializeTheme();
 
-loadWeather({
-  mode: "search",
-  value: DEFAULT_CITY_QUERY,
-  label: currentLanguage === "ar" ? "المنامة" : DEFAULT_CITY_QUERY,
-});
+  const locationLoaded = await useCurrentLocation({ silentFallback: true });
+
+  if (!locationLoaded) {
+    await loadWeather({
+      mode: "search",
+      value: DEFAULT_CITY_QUERY,
+      label: currentLanguage === "ar" ? "المنامة" : DEFAULT_CITY_QUERY,
+    });
+  }
+}
+
+initializeApp();

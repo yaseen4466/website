@@ -223,7 +223,7 @@ h1 {
 
 .search-controls {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   gap: 12px;
 }
 
@@ -242,6 +242,10 @@ h1 {
   font-weight: 700;
   cursor: pointer;
   transition: transform 140ms ease, opacity 140ms ease, background 140ms ease;
+}
+
+.location-button {
+  white-space: nowrap;
 }
 
 .search-button {
@@ -345,6 +349,24 @@ h1 {
   border: 1px solid var(--surface-border);
 }
 
+.current-summary {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.current-copy {
+  display: grid;
+  gap: 10px;
+}
+
+.condition-icon {
+  min-width: 72px;
+  font-size: clamp(3rem, 8vw, 4.5rem);
+  line-height: 1;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.12));
+}
+
 .location {
   margin: 0 0 10px;
   font-size: 1rem;
@@ -363,7 +385,7 @@ h1 {
 }
 
 .condition {
-  margin: 14px 0 0;
+  margin: 0;
   font-size: 1.05rem;
   color: var(--text-muted);
 }
@@ -424,7 +446,7 @@ h1 {
 .forecast-grid {
   margin-top: 16px;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 14px;
 }
 
@@ -435,6 +457,7 @@ h1 {
   border: 1px solid var(--surface-border);
   display: grid;
   gap: 8px;
+  justify-items: start;
 }
 
 .forecast-day,
@@ -445,6 +468,11 @@ h1 {
 .forecast-day {
   font-size: 0.9rem;
   font-weight: 700;
+}
+
+.forecast-icon {
+  font-size: 1.8rem;
+  line-height: 1;
 }
 
 .forecast-temp {
@@ -485,6 +513,14 @@ html[dir="rtl"] .site-footer {
 html[dir="rtl"] .toolbar-actions,
 html[dir="rtl"] .favorite-chip {
   flex-direction: row-reverse;
+}
+
+html[dir="rtl"] .current-summary {
+  flex-direction: row-reverse;
+}
+
+html[dir="rtl"] .forecast-card {
+  justify-items: end;
 }
 
 body.is-language-switching .weather-card {
@@ -532,7 +568,7 @@ body.is-language-switching .site-footer {
   }
 
   .forecast-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .search-controls {
@@ -549,5 +585,16 @@ body.is-language-switching .site-footer {
   .toolbar-actions {
     width: 100%;
     justify-content: space-between;
+  }
+
+  .current-summary {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 420px) {
+  .forecast-grid {
+    grid-template-columns: 1fr;
   }
 }

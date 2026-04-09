@@ -67,6 +67,9 @@
             <button id="search-button" class="search-button" type="submit">
               Search
             </button>
+            <button id="location-button" class="ghost-button location-button" type="button">
+              Use My Location
+            </button>
           </div>
         </form>
 
@@ -98,8 +101,13 @@
         >
           <div class="primary-stat">
             <p id="location" class="location">Manama, Bahrain</p>
-            <p id="temperature" class="temperature">--°C</p>
-            <p id="condition" class="condition">Waiting for weather data</p>
+            <div class="current-summary">
+              <span id="condition-icon" class="condition-icon" aria-hidden="true">--</span>
+              <div class="current-copy">
+                <p id="temperature" class="temperature">--°C</p>
+                <p id="condition" class="condition">Waiting for weather data</p>
+              </div>
+            </div>
           </div>
 
           <div class="metrics-grid">
@@ -115,21 +123,36 @@
 
           <section class="forecast-panel" aria-labelledby="forecast-title">
             <div class="forecast-header">
-              <h2 id="forecast-title" class="section-title">3-Day Forecast</h2>
+              <h2 id="forecast-title" class="section-title">5-Day Forecast</h2>
             </div>
             <div id="forecast-grid" class="forecast-grid">
               <article class="forecast-card">
                 <span class="forecast-day">Day 1</span>
+                <span class="forecast-icon" aria-hidden="true">--</span>
                 <strong class="forecast-temp">-- / --</strong>
                 <span class="forecast-condition">Waiting for data</span>
               </article>
               <article class="forecast-card">
                 <span class="forecast-day">Day 2</span>
+                <span class="forecast-icon" aria-hidden="true">--</span>
                 <strong class="forecast-temp">-- / --</strong>
                 <span class="forecast-condition">Waiting for data</span>
               </article>
               <article class="forecast-card">
                 <span class="forecast-day">Day 3</span>
+                <span class="forecast-icon" aria-hidden="true">--</span>
+                <strong class="forecast-temp">-- / --</strong>
+                <span class="forecast-condition">Waiting for data</span>
+              </article>
+              <article class="forecast-card">
+                <span class="forecast-day">Day 4</span>
+                <span class="forecast-icon" aria-hidden="true">--</span>
+                <strong class="forecast-temp">-- / --</strong>
+                <span class="forecast-condition">Waiting for data</span>
+              </article>
+              <article class="forecast-card">
+                <span class="forecast-day">Day 5</span>
+                <span class="forecast-icon" aria-hidden="true">--</span>
                 <strong class="forecast-temp">-- / --</strong>
                 <span class="forecast-condition">Waiting for data</span>
               </article>

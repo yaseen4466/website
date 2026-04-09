@@ -8,10 +8,12 @@ A simple weather website built with HTML, CSS, and JavaScript that lets users se
 - Current weather only
 - City search input and search button
 - Gulf capitals dropdown for quick selection
-- 3-day forecast
+- 5-day forecast
+- Weather icons for current conditions and forecast
 - Dark mode toggle
 - Arabic/English language switch with RTL support
 - Favorite cities saved in the browser
+- Auto-detect current location
 - Displays location, temperature, condition, humidity, and wind speed
 - Loading state while data is being fetched
 - Error handling with a retry button when the weather request fails
@@ -22,7 +24,7 @@ A simple weather website built with HTML, CSS, and JavaScript that lets users se
 
 - `index.html` - page structure
 - `styles.css` - styling and responsive layout
-- `script.js` - geocoding lookup, forecast logic, theme/favorites persistence, and UI updates
+- `script.js` - geocoding lookup, 5-day forecast logic, icons, auto-location, and theme/favorites persistence
 
 ## Run Locally
 
@@ -59,9 +61,10 @@ Open the localhost URL shown in the terminal.
 ## Expected Behavior
 
 - The page first shows `Loading current weather...`
+- The app tries to detect the user's current location on load and can also use the location button
 - Selecting a Gulf capital loads its weather directly
 - After the API responds, the page shows the searched city's weather details
-- The app also shows a 3-day forecast
+- The app also shows a 5-day forecast with weather icons
 - Language switching between English and Arabic is saved in the browser
 - Theme preference and favorite cities persist in `localStorage`
 - If the city name is invalid, the page shows an error message
