@@ -43,6 +43,38 @@ body {
     radial-gradient(circle at top left, rgba(15, 157, 138, 0.2), transparent 28%),
     radial-gradient(circle at right, rgba(70, 138, 255, 0.18), transparent 24%),
     linear-gradient(160deg, var(--bg-top), var(--bg-bottom));
+  transition: background 220ms ease, color 220ms ease;
+}
+
+html,
+body,
+.weather-card,
+.card-toolbar,
+.toolbar-actions,
+.search-controls,
+.favorites-header,
+.forecast-header,
+.site-footer,
+.primary-stat,
+.forecast-card,
+.metric,
+.favorites-panel,
+.forecast-panel,
+.capital-select,
+.city-input,
+.language-select,
+.theme-toggle,
+.ghost-button,
+.search-button,
+.retry-button,
+.footer-credit {
+  transition:
+    background 220ms ease,
+    color 220ms ease,
+    border-color 220ms ease,
+    box-shadow 220ms ease,
+    transform 220ms ease,
+    opacity 220ms ease;
 }
 
 .page-shell {
@@ -73,6 +105,12 @@ body {
 
 .card-toolbar {
   margin-bottom: 24px;
+}
+
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .toolbar-label {
@@ -129,7 +167,8 @@ h1 {
 }
 
 .capital-select,
-.city-input {
+.city-input,
+.language-select {
   width: 100%;
   padding: 14px 16px;
   border: 1px solid rgba(110, 159, 202, 0.28);
@@ -139,6 +178,12 @@ h1 {
   font: inherit;
   font-weight: 600;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.language-select {
+  min-width: 84px;
+  padding: 10px 14px;
+  border-radius: 999px;
 }
 
 .favorites-panel,
@@ -156,7 +201,8 @@ h1 {
 }
 
 .capital-select:focus,
-.city-input:focus {
+.city-input:focus,
+.language-select:focus {
   outline: 2px solid rgba(18, 119, 184, 0.24);
   border-color: rgba(18, 119, 184, 0.45);
 }
@@ -379,6 +425,71 @@ h1 {
   display: none;
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+html[dir="rtl"] body {
+  direction: rtl;
+}
+
+html[dir="rtl"] .weather-card,
+html[dir="rtl"] .hero-copy,
+html[dir="rtl"] .favorites-panel,
+html[dir="rtl"] .forecast-panel,
+html[dir="rtl"] .primary-stat,
+html[dir="rtl"] .metric,
+html[dir="rtl"] .site-footer {
+  text-align: right;
+}
+
+html[dir="rtl"] .toolbar-actions,
+html[dir="rtl"] .favorite-chip {
+  flex-direction: row-reverse;
+}
+
+body.is-language-switching .weather-card {
+  animation: language-card-shift 320ms ease;
+}
+
+body.is-language-switching .hero-copy,
+body.is-language-switching .control-row,
+body.is-language-switching .status-banner,
+body.is-language-switching .weather-content,
+body.is-language-switching .site-footer {
+  animation: language-fade 320ms ease;
+}
+
+@keyframes language-card-shift {
+  0% {
+    opacity: 0.72;
+    transform: translateX(var(--language-shift, 14px)) scale(0.99);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes language-fade {
+  0% {
+    opacity: 0.45;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
 @media (max-width: 640px) {
   .weather-card {
     padding: 24px;
@@ -402,5 +513,10 @@ h1 {
   .forecast-header {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .toolbar-actions {
+    width: 100%;
+    justify-content: space-between;
   }
 }

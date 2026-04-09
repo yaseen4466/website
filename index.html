@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -17,9 +17,16 @@
       <section class="weather-card" aria-labelledby="weather-title">
         <div class="card-toolbar">
           <p class="toolbar-label">Local Weather Desk</p>
-          <button id="theme-toggle" class="theme-toggle" type="button" aria-pressed="false">
-            Dark mode
-          </button>
+          <div class="toolbar-actions">
+            <label class="sr-only" for="language-select">Choose language</label>
+            <select id="language-select" class="language-select" aria-label="Choose language">
+              <option value="en">EN</option>
+              <option value="ar">AR</option>
+            </select>
+            <button id="theme-toggle" class="theme-toggle" type="button" aria-pressed="false">
+              Dark mode
+            </button>
+          </div>
         </div>
 
         <div class="hero-copy">
