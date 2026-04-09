@@ -1,12 +1,13 @@
-# Bahrain Weather Site
+# Gulf Capitals Weather Site
 
-A simple weather website built with HTML, CSS, and JavaScript that shows the current weather for Bahrain.
+A simple weather website built with HTML, CSS, and JavaScript that shows the current weather for major Gulf capitals.
 
 ## Features
 
 - Clean modern layout
 - Current weather only
-- Displays Bahrain location, temperature, condition, humidity, and wind speed
+- Dropdown menu for Gulf capitals
+- Displays location, temperature, condition, humidity, and wind speed
 - Loading state while data is being fetched
 - Error handling with a retry button when the weather request fails
 - Works when served from `localhost`
@@ -15,7 +16,7 @@ A simple weather website built with HTML, CSS, and JavaScript that shows the cur
 
 - `index.html` - page structure
 - `styles.css` - styling and responsive layout
-- `script.js` - weather fetch logic and UI updates
+- `script.js` - city configuration, weather fetch logic, and UI updates
 
 ## Run Locally
 
@@ -52,9 +53,9 @@ Open the localhost URL shown in the terminal.
 ## Expected Behavior
 
 - The page first shows `Loading current weather...`
-- After the API responds, the page shows the Bahrain weather details
+- After the API responds, the page shows the selected capital's weather details
 - If the request fails or times out, the page shows an error message and a `Try Again` button
 
 ## Weather Data
 
-The app uses the Open-Meteo API for current Bahrain weather data and does not require an API key.
+The app uses the Open-Meteo API for current weather data and does not require an API key.

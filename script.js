@@ -1,15 +1,50 @@
-const WEATHER_ENDPOINT =
-  "https://api.open-meteo.com/v1/forecast?latitude=26.2235&longitude=50.5876&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=auto";
 const REQUEST_TIMEOUT_MS = 8000;
+const WEATHER_QUERY =
+  "current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=auto";
+
+const gulfCapitals = {
+  manama: {
+    name: "Manama, Bahrain",
+    latitude: 26.2235,
+    longitude: 50.5876,
+  },
+  riyadh: {
+    name: "Riyadh, Saudi Arabia",
+    latitude: 24.7136,
+    longitude: 46.6753,
+  },
+  "kuwait-city": {
+    name: "Kuwait City, Kuwait",
+    latitude: 29.3759,
+    longitude: 47.9774,
+  },
+  doha: {
+    name: "Doha, Qatar",
+    latitude: 25.2854,
+    longitude: 51.531,
+  },
+  "abu-dhabi": {
+    name: "Abu Dhabi, UAE",
+    latitude: 24.4539,
+    longitude: 54.3773,
+  },
+  muscat: {
+    name: "Muscat, Oman",
+    latitude: 23.588,
+    longitude: 58.3829,
+  },
+};
 
 const statusElement = document.getElementById("status");
 const weatherContent = document.getElementById("weather-content");
 const retryButton = document.getElementById("retry-button");
+const citySelect = document.getElementById("city-select");
 const locationElement = document.getElementById("location");
 const temperatureElement = document.getElementById("temperature");
 const conditionElement = document.getElementById("condition");
 const humidityElement = document.getElementById("humidity");
 const windSpeedElement = document.getElementById("wind-speed");
+let selectedCityKey = citySelect.value;
 
 const weatherCodeMap = {
   0: "Clear sky",
@@ -48,8 +83,16 @@ function setStatus(message, isError = false) {
   statusElement.classList.remove("hidden");
 }
 
-function showWeather(data) {
-  locationElement.textContent = "Manama, Bahrain";
+function buildWeatherEndpoint(city) {
+  return `https://api.open-meteo.com/v1/forecast?latitude=${city.latitude}&longitude=${city.longitude}&${WEATHER_QUERY}`;
+}
+
+function getSelectedCity() {
+  return gulfCapitals[selectedCityKey];
+}
+
+function showWeather(city, data) {
+  locationElement.textContent = city.name;
   temperatureElement.textContent = `${Math.round(data.temperature_2m)}°C`;
   conditionElement.textContent =
     weatherCodeMap[data.weather_code] || "Condition unavailable";
@@ -65,20 +108,22 @@ function showError() {
   weatherContent.classList.add("hidden");
   retryButton.classList.remove("hidden");
   setStatus(
-    "Unable to load Bahrain weather right now. Please check your connection and try again.",
+    `Unable to load weather for ${getSelectedCity().name} right now. Please check your connection and try again.`,
     true
   );
 }
 
 async function loadWeather() {
-  setStatus("Loading current weather...");
+  const city = getSelectedCity();
+
+  setStatus(`Loading current weather for ${city.name}...`);
   retryButton.classList.add("hidden");
   weatherContent.classList.add("hidden");
   const controller = new AbortController();
   const timeoutId = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
   try {
-    const response = await fetch(WEATHER_ENDPOINT, {
+    const response = await fetch(buildWeatherEndpoint(city), {
       signal: controller.signal,
     });
 
@@ -92,14 +137,19 @@ async function loadWeather() {
       throw new Error("Weather response did not include current data");
     }
 
-    showWeather(payload.current);
+    showWeather(city, payload.current);
   } catch (error) {
-    console.error("Failed to load Bahrain weather:", error);
+    console.error(`Failed to load weather for ${city.name}:`, error);
     showError();
   } finally {
     window.clearTimeout(timeoutId);
   }
 }
+
+citySelect.addEventListener("change", () => {
+  selectedCityKey = citySelect.value;
+  loadWeather();
+});
 
 retryButton.addEventListener("click", loadWeather);
 
