@@ -1,7 +1,13 @@
 const REQUEST_TIMEOUT_MS = 8000;
-const WEATHER_QUERY =
-  "current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=auto";
+const WEATHER_QUERY = [
+  "current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m",
+  "daily=weather_code,temperature_2m_max,temperature_2m_min",
+  "forecast_days=3",
+  "timezone=auto",
+].join("&");
 const DEFAULT_CITY_QUERY = "Manama";
+const THEME_STORAGE_KEY = "weather-theme";
+const FAVORITES_STORAGE_KEY = "weather-favorites";
 const gulfCapitals = {
   manama: {
     name: "Manama, Bahrain",
@@ -38,6 +44,10 @@ const gulfCapitals = {
 const statusElement = document.getElementById("status");
 const weatherContent = document.getElementById("weather-content");
 const retryButton = document.getElementById("retry-button");
+const themeToggle = document.getElementById("theme-toggle");
+const saveFavoriteButton = document.getElementById("save-favorite-button");
+const favoritesList = document.getElementById("favorites-list");
+const forecastGrid = document.getElementById("forecast-grid");
 const capitalSelect = document.getElementById("capital-select");
 const searchForm = document.getElementById("search-form");
 const cityInput = document.getElementById("city-input");
@@ -51,6 +61,8 @@ let lastRequestedLocation = {
   value: DEFAULT_CITY_QUERY,
   label: DEFAULT_CITY_QUERY,
 };
+let currentResolvedCity = null;
+let favoriteCities = loadFavoriteCities();
 
 const weatherCodeMap = {
   0: "Clear sky",
@@ -89,6 +101,34 @@ function setStatus(message, isError = false) {
   statusElement.classList.remove("hidden");
 }
 
+function loadFavoriteCities() {
+  try {
+    const stored = window.localStorage.getItem(FAVORITES_STORAGE_KEY);
+    const parsed = stored ? JSON.parse(stored) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    console.error("Failed to load favorite cities:", error);
+    return [];
+  }
+}
+
+function saveFavoriteCities() {
+  window.localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favoriteCities));
+}
+
+function applyTheme(theme) {
+  const isDarkMode = theme === "dark";
+  document.body.classList.toggle("dark-mode", isDarkMode);
+  themeToggle.textContent = isDarkMode ? "Light mode" : "Dark mode";
+  themeToggle.setAttribute("aria-pressed", String(isDarkMode));
+  window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+}
+
+function initializeTheme() {
+  const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+  applyTheme(storedTheme === "dark" ? "dark" : "light");
+}
+
 function buildWeatherEndpoint(city) {
   return `https://api.open-meteo.com/v1/forecast?latitude=${city.latitude}&longitude=${city.longitude}&${WEATHER_QUERY}`;
 }
@@ -102,13 +142,65 @@ function getCapitalByKey(capitalKey) {
   return gulfCapitals[capitalKey];
 }
 
+function formatForecastDay(dateString) {
+  return new Date(dateString).toLocaleDateString(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
+}
+
+function renderForecast(daily) {
+  if (!daily || !daily.time) {
+    forecastGrid.innerHTML = "";
+    return;
+  }
+
+  forecastGrid.innerHTML = daily.time
+    .map((date, index) => {
+      const condition =
+        weatherCodeMap[daily.weather_code[index]] || "Condition unavailable";
+
+      return `
+        <article class="forecast-card">
+          <span class="forecast-day">${formatForecastDay(date)}</span>
+          <strong class="forecast-temp">${Math.round(daily.temperature_2m_max[index])}° / ${Math.round(daily.temperature_2m_min[index])}°</strong>
+          <span class="forecast-condition">${condition}</span>
+        </article>
+      `;
+    })
+    .join("");
+}
+
+function renderFavorites() {
+  if (favoriteCities.length === 0) {
+    favoritesList.innerHTML = '<p class="empty-message">No favorite cities yet.</p>';
+    return;
+  }
+
+  favoritesList.innerHTML = favoriteCities
+    .map(
+      (city) => `
+        <div class="favorite-chip">
+          <button class="favorite-button" type="button" data-city="${city}">${city}</button>
+          <button class="favorite-remove" type="button" aria-label="Remove ${city}" data-remove-city="${city}">x</button>
+        </div>
+      `
+    )
+    .join("");
+}
+
 function showWeather(city, data) {
+  const current = data.current;
+
+  currentResolvedCity = city;
   locationElement.textContent = city.name;
-  temperatureElement.textContent = `${Math.round(data.temperature_2m)}°C`;
+  temperatureElement.textContent = `${Math.round(current.temperature_2m)}°C`;
   conditionElement.textContent =
-    weatherCodeMap[data.weather_code] || "Condition unavailable";
-  humidityElement.textContent = `${data.relative_humidity_2m}%`;
-  windSpeedElement.textContent = `${Math.round(data.wind_speed_10m)} km/h`;
+    weatherCodeMap[current.weather_code] || "Condition unavailable";
+  humidityElement.textContent = `${current.relative_humidity_2m}%`;
+  windSpeedElement.textContent = `${Math.round(current.wind_speed_10m)} km/h`;
+  renderForecast(data.daily);
 
   weatherContent.classList.remove("hidden");
   retryButton.classList.add("hidden");
@@ -168,11 +260,11 @@ async function loadWeather(request = lastRequestedLocation) {
         : await fetchCityCoordinates(request.value, controller);
     const payload = await fetchJson(buildWeatherEndpoint(city), controller);
 
-    if (!payload.current) {
+    if (!payload.current || !payload.daily) {
       throw new Error("Weather response did not include current data");
     }
 
-    showWeather(city, payload.current);
+    showWeather(city, payload);
   } catch (error) {
     console.error(`Failed to load weather for ${request.label}:`, error);
     showError();
@@ -218,7 +310,59 @@ searchForm.addEventListener("submit", (event) => {
 
 retryButton.addEventListener("click", loadWeather);
 
+themeToggle.addEventListener("click", () => {
+  const nextTheme = document.body.classList.contains("dark-mode") ? "light" : "dark";
+  applyTheme(nextTheme);
+});
+
+saveFavoriteButton.addEventListener("click", () => {
+  if (!currentResolvedCity) {
+    setStatus("Load a city first before saving it to favorites.", true);
+    return;
+  }
+
+  if (favoriteCities.includes(currentResolvedCity.name)) {
+    setStatus(`${currentResolvedCity.name} is already in your favorites.`, true);
+    return;
+  }
+
+  favoriteCities = [...favoriteCities, currentResolvedCity.name];
+  saveFavoriteCities();
+  renderFavorites();
+  setStatus(`${currentResolvedCity.name} saved to favorites.`);
+});
+
+favoritesList.addEventListener("click", (event) => {
+  const target = event.target;
+
+  if (!(target instanceof HTMLElement)) {
+    return;
+  }
+
+  const removeCity = target.dataset.removeCity;
+  const selectedCity = target.dataset.city;
+
+  if (removeCity) {
+    favoriteCities = favoriteCities.filter((city) => city !== removeCity);
+    saveFavoriteCities();
+    renderFavorites();
+    return;
+  }
+
+  if (selectedCity) {
+    capitalSelect.value = "";
+    cityInput.value = selectedCity;
+    loadWeather({
+      mode: "search",
+      value: selectedCity,
+      label: selectedCity,
+    });
+  }
+});
+
 cityInput.value = DEFAULT_CITY_QUERY;
+initializeTheme();
+renderFavorites();
 
 loadWeather({
   mode: "search",

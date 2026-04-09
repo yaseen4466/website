@@ -15,6 +15,13 @@
   <body>
     <main class="page-shell">
       <section class="weather-card" aria-labelledby="weather-title">
+        <div class="card-toolbar">
+          <p class="toolbar-label">Local Weather Desk</p>
+          <button id="theme-toggle" class="theme-toggle" type="button" aria-pressed="false">
+            Dark mode
+          </button>
+        </div>
+
         <div class="hero-copy">
           <p class="eyebrow">Live Weather</p>
           <h1 id="weather-title">City Forecast Snapshot</h1>
@@ -56,6 +63,18 @@
           </div>
         </form>
 
+        <section class="control-row favorites-panel" aria-labelledby="favorites-title">
+          <div class="favorites-header">
+            <h2 id="favorites-title" class="section-title">Favorite Cities</h2>
+            <button id="save-favorite-button" class="ghost-button" type="button">
+              Save Current City
+            </button>
+          </div>
+          <div id="favorites-list" class="favorites-list">
+            <p class="empty-message">No favorite cities yet.</p>
+          </div>
+        </section>
+
         <div
           id="status"
           class="status-banner"
@@ -86,6 +105,29 @@
               <strong id="wind-speed" class="metric-value">-- km/h</strong>
             </article>
           </div>
+
+          <section class="forecast-panel" aria-labelledby="forecast-title">
+            <div class="forecast-header">
+              <h2 id="forecast-title" class="section-title">3-Day Forecast</h2>
+            </div>
+            <div id="forecast-grid" class="forecast-grid">
+              <article class="forecast-card">
+                <span class="forecast-day">Day 1</span>
+                <strong class="forecast-temp">-- / --</strong>
+                <span class="forecast-condition">Waiting for data</span>
+              </article>
+              <article class="forecast-card">
+                <span class="forecast-day">Day 2</span>
+                <strong class="forecast-temp">-- / --</strong>
+                <span class="forecast-condition">Waiting for data</span>
+              </article>
+              <article class="forecast-card">
+                <span class="forecast-day">Day 3</span>
+                <strong class="forecast-temp">-- / --</strong>
+                <span class="forecast-condition">Waiting for data</span>
+              </article>
+            </div>
+          </section>
         </section>
 
         <button id="retry-button" class="retry-button hidden" type="button">
