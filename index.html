@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>City Weather Search</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="page-shell">
+      <section class="weather-card" aria-labelledby="weather-title">
+        <div class="card-toolbar">
+          <p class="toolbar-label">Local Weather Desk</p>
+          <div class="toolbar-actions">
+            <label class="sr-only" for="language-select">Choose language</label>
+            <select id="language-select" class="language-select" aria-label="Choose language">
+              <option value="en">EN</option>
+              <option value="ar">AR</option>
+            </select>
+            <button id="theme-toggle" class="theme-toggle" type="button" aria-pressed="false">
+              Dark mode
+            </button>
+          </div>
+        </div>
+
+        <div class="hero-copy">
+          <p class="eyebrow">Live Weather</p>
+          <h1 id="weather-title">City Forecast Snapshot</h1>
+          <p class="intro">
+            Choose a Gulf capital or search for any city to see current
+            conditions with temperature, humidity, wind, and a plain-language
+            status.
+          </p>
+        </div>
+
+        <div class="control-row">
+          <label class="select-label" for="capital-select">Quick Gulf capitals</label>
+          <select id="capital-select" class="capital-select" aria-label="Choose a Gulf capital">
+            <option value="">Select a Gulf capital</option>
+            <option value="manama">Manama, Bahrain</option>
+            <option value="riyadh">Riyadh, Saudi Arabia</option>
+            <option value="kuwait-city">Kuwait City, Kuwait</option>
+            <option value="doha">Doha, Qatar</option>
+            <option value="abu-dhabi">Abu Dhabi, UAE</option>
+            <option value="muscat">Muscat, Oman</option>
+          </select>
+        </div>
+
+        <form id="search-form" class="control-row search-form">
+          <label class="select-label" for="city-input">Search for a city</label>
+          <div class="search-controls">
+            <input
+              id="city-input"
+              class="city-input"
+              type="text"
+              name="city"
+              placeholder="Enter a city name"
+              autocomplete="off"
+              aria-label="Enter a city name"
+            />
+            <button id="search-button" class="search-button" type="submit">
+              Search
+            </button>
+            <button id="location-button" class="ghost-button location-button" type="button">
+              Use My Location
+            </button>
+          </div>
+          <div id="search-suggestions" class="suggestions-list hidden" role="listbox"></div>
+        </form>
+
+        <section class="control-row favorites-panel" aria-labelledby="favorites-title">
+          <div class="favorites-header">
+            <h2 id="favorites-title" class="section-title">Favorite Cities</h2>
+            <button id="save-favorite-button" class="ghost-button" type="button">
+              Save Current City
+            </button>
+          </div>
+          <div id="favorites-list" class="favorites-list">
+            <p class="empty-message">No favorite cities yet.</p>
+          </div>
+        </section>
+
+        <div
+          id="status"
+          class="status-banner"
+          role="status"
+          aria-live="polite"
+        >
+          Loading current weather...
+        </div>
+
+        <section id="alert-banner" class="alert-banner hidden" role="alert"></section>
+
+        <section
+          id="weather-content"
+          class="weather-content hidden"
+          aria-label="Current weather details"
+        >
+          <div class="primary-stat">
+            <p id="location" class="location">Manama, Bahrain</p>
+            <div class="current-summary">
+              <span id="condition-icon" class="condition-icon" aria-hidden="true">--</span>
+              <div class="current-copy">
+                <p id="temperature" class="temperature">--°C</p>
+                <p id="condition" class="condition">Waiting for weather data</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="metrics-grid">
+            <article class="metric">
+              <span class="metric-label">Humidity</span>
+              <strong id="humidity" class="metric-value">--%</strong>
+            </article>
+            <article class="metric">
+              <span class="metric-label">Wind Speed</span>
+              <strong id="wind-speed" class="metric-value">-- km/h</strong>
+            </article>
+          </div>
+
+          <section class="forecast-panel" aria-labelledby="forecast-title">
+            <div class="forecast-header">
+              <h2 id="forecast-title" class="section-title">5-Day Forecast</h2>
+            </div>
+            <div id="forecast-grid" class="forecast-grid">
+              <article class="forecast-card">
+                <span class="forecast-day">Day 1</span>
+                <span class="forecast-icon" aria-hidden="true">--</span>
+                <strong class="forecast-temp">-- / --</strong>
+                <span class="forecast-condition">Waiting for data</span>
+              </article>
+              <article class="forecast-card">
+                <span class="forecast-day">Day 2</span>
+                <span class="forecast-icon" aria-hidden="true">--</span>
+                <strong class="forecast-temp">-- / --</strong>
+                <span class="forecast-condition">Waiting for data</span>
+              </article>
+              <article class="forecast-card">
+                <span class="forecast-day">Day 3</span>
+                <span class="forecast-icon" aria-hidden="true">--</span>
+                <strong class="forecast-temp">-- / --</strong>
+                <span class="forecast-condition">Waiting for data</span>
+              </article>
+              <article class="forecast-card">
+                <span class="forecast-day">Day 4</span>
+                <span class="forecast-icon" aria-hidden="true">--</span>
+                <strong class="forecast-temp">-- / --</strong>
+                <span class="forecast-condition">Waiting for data</span>
+              </article>
+              <article class="forecast-card">
+                <span class="forecast-day">Day 5</span>
+                <span class="forecast-icon" aria-hidden="true">--</span>
+                <strong class="forecast-temp">-- / --</strong>
+                <span class="forecast-condition">Waiting for data</span>
+              </article>
+            </div>
+          </section>
+        </section>
+
+        <button id="retry-button" class="retry-button hidden" type="button">
+          Try Again
+        </button>
+
+        <footer class="site-footer" aria-label="Site credit">
+          <p class="footer-credit">Built by Yaseen Mohamed</p>
+        </footer>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
