@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Gulf Capitals Weather</title>
+    <title>City Weather Search</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -17,24 +17,30 @@
       <section class="weather-card" aria-labelledby="weather-title">
         <div class="hero-copy">
           <p class="eyebrow">Live Weather</p>
-          <h1 id="weather-title">Gulf Capitals Forecast Snapshot</h1>
+          <h1 id="weather-title">City Forecast Snapshot</h1>
           <p class="intro">
-            Current conditions for Gulf capitals with temperature, humidity,
-            wind, and a plain-language status.
+            Search for any city to see current conditions with temperature,
+            humidity, wind, and a plain-language status.
           </p>
         </div>
 
-        <div class="control-row">
-          <label class="select-label" for="city-select">Choose a capital</label>
-          <select id="city-select" class="city-select" aria-label="Choose a Gulf capital">
-            <option value="manama">Manama, Bahrain</option>
-            <option value="riyadh">Riyadh, Saudi Arabia</option>
-            <option value="kuwait-city">Kuwait City, Kuwait</option>
-            <option value="doha">Doha, Qatar</option>
-            <option value="abu-dhabi">Abu Dhabi, UAE</option>
-            <option value="muscat">Muscat, Oman</option>
-          </select>
-        </div>
+        <form id="search-form" class="control-row search-form">
+          <label class="select-label" for="city-input">Search for a city</label>
+          <div class="search-controls">
+            <input
+              id="city-input"
+              class="city-input"
+              type="text"
+              name="city"
+              placeholder="Enter a city name"
+              autocomplete="off"
+              aria-label="Enter a city name"
+            />
+            <button id="search-button" class="search-button" type="submit">
+              Search
+            </button>
+          </div>
+        </form>
 
         <div
           id="status"

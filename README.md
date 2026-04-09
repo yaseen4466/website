@@ -1,22 +1,23 @@
-# Gulf Capitals Weather Site
+# City Weather Search
 
-A simple weather website built with HTML, CSS, and JavaScript that shows the current weather for major Gulf capitals.
+A simple weather website built with HTML, CSS, and JavaScript that lets users search for a city and view its current weather.
 
 ## Features
 
 - Clean modern layout
 - Current weather only
-- Dropdown menu for Gulf capitals
+- City search input and search button
 - Displays location, temperature, condition, humidity, and wind speed
 - Loading state while data is being fetched
 - Error handling with a retry button when the weather request fails
+- Invalid city-name handling
 - Works when served from `localhost`
 
 ## Files
 
 - `index.html` - page structure
 - `styles.css` - styling and responsive layout
-- `script.js` - city configuration, weather fetch logic, and UI updates
+- `script.js` - geocoding lookup, weather fetch logic, and UI updates
 
 ## Run Locally
 
@@ -53,9 +54,10 @@ Open the localhost URL shown in the terminal.
 ## Expected Behavior
 
 - The page first shows `Loading current weather...`
-- After the API responds, the page shows the selected capital's weather details
+- After the API responds, the page shows the searched city's weather details
+- If the city name is invalid, the page shows an error message
 - If the request fails or times out, the page shows an error message and a `Try Again` button
 
 ## Weather Data
 
-The app uses the Open-Meteo API for current weather data and does not require an API key.
+The app uses the Open-Meteo Geocoding API to find city coordinates and the Open-Meteo Forecast API for current weather data. No API key is required.

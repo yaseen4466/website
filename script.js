@@ -1,50 +1,19 @@
 const REQUEST_TIMEOUT_MS = 8000;
 const WEATHER_QUERY =
   "current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=auto";
-
-const gulfCapitals = {
-  manama: {
-    name: "Manama, Bahrain",
-    latitude: 26.2235,
-    longitude: 50.5876,
-  },
-  riyadh: {
-    name: "Riyadh, Saudi Arabia",
-    latitude: 24.7136,
-    longitude: 46.6753,
-  },
-  "kuwait-city": {
-    name: "Kuwait City, Kuwait",
-    latitude: 29.3759,
-    longitude: 47.9774,
-  },
-  doha: {
-    name: "Doha, Qatar",
-    latitude: 25.2854,
-    longitude: 51.531,
-  },
-  "abu-dhabi": {
-    name: "Abu Dhabi, UAE",
-    latitude: 24.4539,
-    longitude: 54.3773,
-  },
-  muscat: {
-    name: "Muscat, Oman",
-    latitude: 23.588,
-    longitude: 58.3829,
-  },
-};
+const DEFAULT_CITY_QUERY = "Manama";
 
 const statusElement = document.getElementById("status");
 const weatherContent = document.getElementById("weather-content");
 const retryButton = document.getElementById("retry-button");
-const citySelect = document.getElementById("city-select");
+const searchForm = document.getElementById("search-form");
+const cityInput = document.getElementById("city-input");
 const locationElement = document.getElementById("location");
 const temperatureElement = document.getElementById("temperature");
 const conditionElement = document.getElementById("condition");
 const humidityElement = document.getElementById("humidity");
 const windSpeedElement = document.getElementById("wind-speed");
-let selectedCityKey = citySelect.value;
+let lastSearchedCity = DEFAULT_CITY_QUERY;
 
 const weatherCodeMap = {
   0: "Clear sky",
@@ -87,8 +56,9 @@ function buildWeatherEndpoint(city) {
   return `https://api.open-meteo.com/v1/forecast?latitude=${city.latitude}&longitude=${city.longitude}&${WEATHER_QUERY}`;
 }
 
-function getSelectedCity() {
-  return gulfCapitals[selectedCityKey];
+function buildGeocodingEndpoint(cityName) {
+  const query = encodeURIComponent(cityName);
+  return `https://geocoding-api.open-meteo.com/v1/search?name=${query}&count=1&language=en&format=json`;
 }
 
 function showWeather(city, data) {
@@ -108,30 +78,52 @@ function showError() {
   weatherContent.classList.add("hidden");
   retryButton.classList.remove("hidden");
   setStatus(
-    `Unable to load weather for ${getSelectedCity().name} right now. Please check your connection and try again.`,
+    `Unable to load weather for ${lastSearchedCity} right now. Please check your city name and try again.`,
     true
   );
 }
 
-async function loadWeather() {
-  const city = getSelectedCity();
+async function fetchJson(url, controller) {
+  const response = await fetch(url, {
+    signal: controller.signal,
+  });
 
-  setStatus(`Loading current weather for ${city.name}...`);
+  if (!response.ok) {
+    throw new Error(`Request failed with status ${response.status}`);
+  }
+
+  return response.json();
+}
+
+async function fetchCityCoordinates(cityName, controller) {
+  const payload = await fetchJson(buildGeocodingEndpoint(cityName), controller);
+
+  if (!payload.results || payload.results.length === 0) {
+    throw new Error("City not found");
+  }
+
+  const [result] = payload.results;
+
+  return {
+    name: [result.name, result.country].filter(Boolean).join(", "),
+    latitude: result.latitude,
+    longitude: result.longitude,
+  };
+}
+
+async function loadWeather(cityName = lastSearchedCity) {
+  const normalizedCityName = cityName.trim();
+  lastSearchedCity = normalizedCityName || DEFAULT_CITY_QUERY;
+
+  setStatus(`Loading current weather for ${lastSearchedCity}...`);
   retryButton.classList.add("hidden");
   weatherContent.classList.add("hidden");
   const controller = new AbortController();
   const timeoutId = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
   try {
-    const response = await fetch(buildWeatherEndpoint(city), {
-      signal: controller.signal,
-    });
-
-    if (!response.ok) {
-      throw new Error(`Weather request failed with status ${response.status}`);
-    }
-
-    const payload = await response.json();
+    const city = await fetchCityCoordinates(lastSearchedCity, controller);
+    const payload = await fetchJson(buildWeatherEndpoint(city), controller);
 
     if (!payload.current) {
       throw new Error("Weather response did not include current data");
@@ -139,18 +131,29 @@ async function loadWeather() {
 
     showWeather(city, payload.current);
   } catch (error) {
-    console.error(`Failed to load weather for ${city.name}:`, error);
+    console.error(`Failed to load weather for ${lastSearchedCity}:`, error);
     showError();
   } finally {
     window.clearTimeout(timeoutId);
   }
 }
 
-citySelect.addEventListener("change", () => {
-  selectedCityKey = citySelect.value;
-  loadWeather();
+searchForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const submittedCity = cityInput.value.trim();
+
+  if (!submittedCity) {
+    setStatus("Please enter a city name before searching.", true);
+    weatherContent.classList.add("hidden");
+    retryButton.classList.add("hidden");
+    return;
+  }
+
+  loadWeather(submittedCity);
 });
 
 retryButton.addEventListener("click", loadWeather);
 
-loadWeather();
+cityInput.value = DEFAULT_CITY_QUERY;
+
+loadWeather(DEFAULT_CITY_QUERY);
