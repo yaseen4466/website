@@ -87,12 +87,7 @@ h1 {
   gap: 10px;
 }
 
-.search-controls {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 12px;
-}
-
+.capital-select,
 .city-input {
   width: 100%;
   padding: 14px 16px;
@@ -105,6 +100,13 @@ h1 {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
+.search-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+}
+
+.capital-select:focus,
 .city-input:focus {
   outline: 2px solid rgba(18, 119, 184, 0.24);
   border-color: rgba(18, 119, 184, 0.45);

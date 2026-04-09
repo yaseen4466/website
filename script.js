@@ -2,10 +2,43 @@ const REQUEST_TIMEOUT_MS = 8000;
 const WEATHER_QUERY =
   "current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=auto";
 const DEFAULT_CITY_QUERY = "Manama";
+const gulfCapitals = {
+  manama: {
+    name: "Manama, Bahrain",
+    latitude: 26.2235,
+    longitude: 50.5876,
+  },
+  riyadh: {
+    name: "Riyadh, Saudi Arabia",
+    latitude: 24.7136,
+    longitude: 46.6753,
+  },
+  "kuwait-city": {
+    name: "Kuwait City, Kuwait",
+    latitude: 29.3759,
+    longitude: 47.9774,
+  },
+  doha: {
+    name: "Doha, Qatar",
+    latitude: 25.2854,
+    longitude: 51.531,
+  },
+  "abu-dhabi": {
+    name: "Abu Dhabi, UAE",
+    latitude: 24.4539,
+    longitude: 54.3773,
+  },
+  muscat: {
+    name: "Muscat, Oman",
+    latitude: 23.588,
+    longitude: 58.3829,
+  },
+};
 
 const statusElement = document.getElementById("status");
 const weatherContent = document.getElementById("weather-content");
 const retryButton = document.getElementById("retry-button");
+const capitalSelect = document.getElementById("capital-select");
 const searchForm = document.getElementById("search-form");
 const cityInput = document.getElementById("city-input");
 const locationElement = document.getElementById("location");
@@ -13,7 +46,11 @@ const temperatureElement = document.getElementById("temperature");
 const conditionElement = document.getElementById("condition");
 const humidityElement = document.getElementById("humidity");
 const windSpeedElement = document.getElementById("wind-speed");
-let lastSearchedCity = DEFAULT_CITY_QUERY;
+let lastRequestedLocation = {
+  mode: "search",
+  value: DEFAULT_CITY_QUERY,
+  label: DEFAULT_CITY_QUERY,
+};
 
 const weatherCodeMap = {
   0: "Clear sky",
@@ -61,6 +98,10 @@ function buildGeocodingEndpoint(cityName) {
   return `https://geocoding-api.open-meteo.com/v1/search?name=${query}&count=1&language=en&format=json`;
 }
 
+function getCapitalByKey(capitalKey) {
+  return gulfCapitals[capitalKey];
+}
+
 function showWeather(city, data) {
   locationElement.textContent = city.name;
   temperatureElement.textContent = `${Math.round(data.temperature_2m)}°C`;
@@ -78,7 +119,7 @@ function showError() {
   weatherContent.classList.add("hidden");
   retryButton.classList.remove("hidden");
   setStatus(
-    `Unable to load weather for ${lastSearchedCity} right now. Please check your city name and try again.`,
+    `Unable to load weather for ${lastRequestedLocation.label} right now. Please check your input and try again.`,
     true
   );
 }
@@ -111,18 +152,20 @@ async function fetchCityCoordinates(cityName, controller) {
   };
 }
 
-async function loadWeather(cityName = lastSearchedCity) {
-  const normalizedCityName = cityName.trim();
-  lastSearchedCity = normalizedCityName || DEFAULT_CITY_QUERY;
+async function loadWeather(request = lastRequestedLocation) {
+  lastRequestedLocation = request;
 
-  setStatus(`Loading current weather for ${lastSearchedCity}...`);
+  setStatus(`Loading current weather for ${request.label}...`);
   retryButton.classList.add("hidden");
   weatherContent.classList.add("hidden");
   const controller = new AbortController();
   const timeoutId = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
   try {
-    const city = await fetchCityCoordinates(lastSearchedCity, controller);
+    const city =
+      request.mode === "capital"
+        ? getCapitalByKey(request.value)
+        : await fetchCityCoordinates(request.value, controller);
     const payload = await fetchJson(buildWeatherEndpoint(city), controller);
 
     if (!payload.current) {
@@ -131,12 +174,28 @@ async function loadWeather(cityName = lastSearchedCity) {
 
     showWeather(city, payload.current);
   } catch (error) {
-    console.error(`Failed to load weather for ${lastSearchedCity}:`, error);
+    console.error(`Failed to load weather for ${request.label}:`, error);
     showError();
   } finally {
     window.clearTimeout(timeoutId);
   }
 }
+
+capitalSelect.addEventListener("change", () => {
+  const selectedCapitalKey = capitalSelect.value;
+
+  if (!selectedCapitalKey) {
+    return;
+  }
+
+  const capital = getCapitalByKey(selectedCapitalKey);
+  cityInput.value = capital.name;
+  loadWeather({
+    mode: "capital",
+    value: selectedCapitalKey,
+    label: capital.name,
+  });
+});
 
 searchForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -149,11 +208,20 @@ searchForm.addEventListener("submit", (event) => {
     return;
   }
 
-  loadWeather(submittedCity);
+  capitalSelect.value = "";
+  loadWeather({
+    mode: "search",
+    value: submittedCity,
+    label: submittedCity,
+  });
 });
 
 retryButton.addEventListener("click", loadWeather);
 
 cityInput.value = DEFAULT_CITY_QUERY;
 
-loadWeather(DEFAULT_CITY_QUERY);
+loadWeather({
+  mode: "search",
+  value: DEFAULT_CITY_QUERY,
+  label: DEFAULT_CITY_QUERY,
+});

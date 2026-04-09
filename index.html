@@ -19,9 +19,23 @@
           <p class="eyebrow">Live Weather</p>
           <h1 id="weather-title">City Forecast Snapshot</h1>
           <p class="intro">
-            Search for any city to see current conditions with temperature,
-            humidity, wind, and a plain-language status.
+            Choose a Gulf capital or search for any city to see current
+            conditions with temperature, humidity, wind, and a plain-language
+            status.
           </p>
+        </div>
+
+        <div class="control-row">
+          <label class="select-label" for="capital-select">Quick Gulf capitals</label>
+          <select id="capital-select" class="capital-select" aria-label="Choose a Gulf capital">
+            <option value="">Select a Gulf capital</option>
+            <option value="manama">Manama, Bahrain</option>
+            <option value="riyadh">Riyadh, Saudi Arabia</option>
+            <option value="kuwait-city">Kuwait City, Kuwait</option>
+            <option value="doha">Doha, Qatar</option>
+            <option value="abu-dhabi">Abu Dhabi, UAE</option>
+            <option value="muscat">Muscat, Oman</option>
+          </select>
         </div>
 
         <form id="search-form" class="control-row search-form">
