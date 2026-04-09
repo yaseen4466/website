@@ -64,6 +64,7 @@ const translations = {
     emptyFavorites: "No favorite cities yet.",
     loading: "Loading current weather for {city}...",
     locating: "Detecting your current location...",
+    suggestionsEmpty: "No matching city suggestions found.",
     detailsLabel: "Current weather details",
     humidity: "Humidity",
     windSpeed: "Wind Speed",
@@ -81,6 +82,11 @@ const translations = {
     currentLocation: "your location",
     locationDenied: "Location access was denied. Showing the default city instead.",
     locationUnavailable: "Unable to detect your location. Showing the default city instead.",
+    alertHeat: "Extreme heat expected today.",
+    alertCold: "Very cold conditions expected today.",
+    alertWind: "Strong winds are active right now.",
+    alertStorm: "Storm conditions detected. Take care outdoors.",
+    alertRain: "Heavy rain conditions detected.",
   },
   ar: {
     title: "بحث الطقس للمدن",
@@ -102,6 +108,7 @@ const translations = {
     emptyFavorites: "لا توجد مدن مفضلة بعد.",
     loading: "جارٍ تحميل الطقس الحالي لـ {city}...",
     locating: "جارٍ تحديد موقعك الحالي...",
+    suggestionsEmpty: "لا توجد اقتراحات مطابقة لهذه المدينة.",
     detailsLabel: "تفاصيل الطقس الحالية",
     humidity: "الرطوبة",
     windSpeed: "سرعة الرياح",
@@ -119,6 +126,11 @@ const translations = {
     currentLocation: "موقعك الحالي",
     locationDenied: "تم رفض الوصول إلى الموقع. سيتم عرض المدينة الافتراضية بدلًا من ذلك.",
     locationUnavailable: "تعذر تحديد موقعك. سيتم عرض المدينة الافتراضية بدلًا من ذلك.",
+    alertHeat: "هناك حرارة شديدة متوقعة اليوم.",
+    alertCold: "هناك برودة شديدة متوقعة اليوم.",
+    alertWind: "توجد رياح قوية حاليًا.",
+    alertStorm: "تم رصد ظروف عاصفة. يرجى توخي الحذر خارج المنزل.",
+    alertRain: "تم رصد أمطار غزيرة.",
   },
 };
 
@@ -162,6 +174,8 @@ const locationButton = document.getElementById("location-button");
 const saveFavoriteButton = document.getElementById("save-favorite-button");
 const favoritesList = document.getElementById("favorites-list");
 const forecastGrid = document.getElementById("forecast-grid");
+const searchSuggestions = document.getElementById("search-suggestions");
+const alertBanner = document.getElementById("alert-banner");
 const capitalSelect = document.getElementById("capital-select");
 const searchForm = document.getElementById("search-form");
 const searchButton = document.getElementById("search-button");
@@ -191,6 +205,8 @@ let lastRequestedLocation = {
 };
 let currentResolvedCity = null;
 let favoriteCities = loadFavoriteCities();
+let suggestionDebounceId = null;
+let suggestionsAbortController = null;
 
 function t(key, values = {}) {
   const template = translations[currentLanguage][key] || translations.en[key] || "";
@@ -215,6 +231,16 @@ function getWeatherIcon(code) {
   if ([71, 73, 75, 77, 85, 86].includes(code)) return "❄️";
   if ([95, 96, 99].includes(code)) return "⛈️";
   return "🌡️";
+}
+
+function getWeatherTheme(code) {
+  if (code === 0) return "weather-clear";
+  if (code === 1 || code === 2 || code === 3) return "weather-cloudy";
+  if (code === 45 || code === 48) return "weather-fog";
+  if ([61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return "weather-rain";
+  if ([71, 73, 75, 77, 85, 86].includes(code)) return "weather-snow";
+  if ([95, 96, 99].includes(code)) return "weather-storm";
+  return "weather-clear";
 }
 
 function getCapitalLabel(capital) {
@@ -249,6 +275,18 @@ function loadFavoriteCities() {
 
 function saveFavoriteCities() {
   window.localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favoriteCities));
+}
+
+function applyWeatherTheme(code) {
+  document.body.classList.remove(
+    "weather-clear",
+    "weather-cloudy",
+    "weather-rain",
+    "weather-storm",
+    "weather-fog",
+    "weather-snow"
+  );
+  document.body.classList.add(getWeatherTheme(code));
 }
 
 function applyTheme(theme) {
@@ -343,6 +381,61 @@ function renderFavorites() {
     .join("");
 }
 
+function hideSuggestions() {
+  searchSuggestions.classList.add("hidden");
+  searchSuggestions.innerHTML = "";
+}
+
+function renderSuggestions(results) {
+  if (!results || results.length === 0) {
+    searchSuggestions.innerHTML = `<p class="empty-message">${t("suggestionsEmpty")}</p>`;
+    searchSuggestions.classList.remove("hidden");
+    return;
+  }
+
+  searchSuggestions.innerHTML = results
+    .map((result) => {
+      const label = [result.name, result.country].filter(Boolean).join(", ");
+      return `<button class="suggestion-item" type="button" data-city="${label}">${label}</button>`;
+    })
+    .join("");
+
+  searchSuggestions.classList.remove("hidden");
+}
+
+function renderAlerts(current, daily) {
+  const alerts = [];
+  const todayMax = daily?.temperature_2m_max?.[0];
+  const todayMin = daily?.temperature_2m_min?.[0];
+
+  if (todayMax !== undefined && todayMax >= 40) {
+    alerts.push(t("alertHeat"));
+  }
+
+  if (todayMin !== undefined && todayMin <= 0) {
+    alerts.push(t("alertCold"));
+  }
+
+  if (current.wind_speed_10m >= 50) {
+    alerts.push(t("alertWind"));
+  }
+
+  if ([95, 96, 99].includes(current.weather_code)) {
+    alerts.push(t("alertStorm"));
+  } else if ([65, 67, 82].includes(current.weather_code)) {
+    alerts.push(t("alertRain"));
+  }
+
+  if (alerts.length === 0) {
+    alertBanner.classList.add("hidden");
+    alertBanner.textContent = "";
+    return;
+  }
+
+  alertBanner.textContent = alerts.join(" • ");
+  alertBanner.classList.remove("hidden");
+}
+
 function updateStaticTranslations() {
   document.documentElement.lang = currentLanguage;
   document.documentElement.dir = currentLanguage === "ar" ? "rtl" : "ltr";
@@ -403,6 +496,7 @@ function animateLanguageSwitch(language) {
     conditionElement.textContent = localizeWeatherCode(currentResolvedCity.weatherCode);
     conditionIconElement.textContent = getWeatherIcon(currentResolvedCity.weatherCode);
     renderForecast(currentResolvedCity.dailyForecast);
+    renderAlerts(currentResolvedCity.currentWeather, currentResolvedCity.dailyForecast);
   }
 
   window.setTimeout(() => {
@@ -415,6 +509,7 @@ function showWeather(city, data) {
 
   currentResolvedCity = {
     ...city,
+    currentWeather: current,
     weatherCode: current.weather_code,
     dailyForecast: data.daily,
   };
@@ -426,6 +521,8 @@ function showWeather(city, data) {
   humidityElement.textContent = `${current.relative_humidity_2m}%`;
   windSpeedElement.textContent = `${Math.round(current.wind_speed_10m)} km/h`;
   renderForecast(data.daily);
+  renderAlerts(current, data.daily);
+  applyWeatherTheme(current.weather_code);
 
   weatherContent.classList.remove("hidden");
   retryButton.classList.add("hidden");
@@ -435,6 +532,7 @@ function showWeather(city, data) {
 function showError() {
   weatherContent.classList.add("hidden");
   retryButton.classList.remove("hidden");
+  alertBanner.classList.add("hidden");
   setStatus(t("error", { city: lastRequestedLocation.label }), true);
 }
 
@@ -464,6 +562,21 @@ async function fetchCityCoordinates(cityName, controller) {
     latitude: result.latitude,
     longitude: result.longitude,
   };
+}
+
+async function fetchCitySuggestions(cityName) {
+  if (suggestionsAbortController) {
+    suggestionsAbortController.abort();
+  }
+
+  suggestionsAbortController = new AbortController();
+  const query = encodeURIComponent(cityName);
+  const payload = await fetchJson(
+    `https://geocoding-api.open-meteo.com/v1/search?name=${query}&count=5&language=${currentLanguage}&format=json`,
+    suggestionsAbortController
+  );
+
+  return payload.results || [];
 }
 
 async function fetchLocationName(latitude, longitude, controller) {
@@ -583,6 +696,7 @@ capitalSelect.addEventListener("change", () => {
     return;
   }
 
+  hideSuggestions();
   const capital = getCapitalByKey(selectedCapitalKey);
   const capitalName = getCapitalLabel(capital);
   cityInput.value = capitalName;
@@ -611,6 +725,7 @@ searchForm.addEventListener("submit", (event) => {
     value: submittedCity,
     label: submittedCity,
   });
+  hideSuggestions();
 });
 
 retryButton.addEventListener("click", loadWeather);
@@ -622,9 +737,11 @@ themeToggle.addEventListener("click", () => {
 
 languageSelect.addEventListener("change", () => {
   animateLanguageSwitch(languageSelect.value);
+  hideSuggestions();
 });
 
 locationButton.addEventListener("click", () => {
+  hideSuggestions();
   useCurrentLocation();
 });
 
@@ -665,12 +782,59 @@ favoritesList.addEventListener("click", (event) => {
   if (selectedCity) {
     capitalSelect.value = "";
     cityInput.value = selectedCity;
+    hideSuggestions();
     loadWeather({
       mode: "search",
       value: selectedCity,
       label: selectedCity,
     });
   }
+});
+
+cityInput.addEventListener("input", () => {
+  const query = cityInput.value.trim();
+
+  if (suggestionDebounceId) {
+    window.clearTimeout(suggestionDebounceId);
+  }
+
+  if (query.length < 2) {
+    hideSuggestions();
+    return;
+  }
+
+  suggestionDebounceId = window.setTimeout(async () => {
+    try {
+      const results = await fetchCitySuggestions(query);
+      renderSuggestions(results);
+    } catch (error) {
+      if (error.name !== "AbortError") {
+        console.error("Failed to fetch search suggestions:", error);
+      }
+    }
+  }, 220);
+});
+
+cityInput.addEventListener("blur", () => {
+  window.setTimeout(hideSuggestions, 120);
+});
+
+searchSuggestions.addEventListener("click", (event) => {
+  const target = event.target;
+
+  if (!(target instanceof HTMLElement) || !target.dataset.city) {
+    return;
+  }
+
+  const selectedCity = target.dataset.city;
+  cityInput.value = selectedCity;
+  hideSuggestions();
+  capitalSelect.value = "";
+  loadWeather({
+    mode: "search",
+    value: selectedCity,
+    label: selectedCity,
+  });
 });
 
 async function initializeApp() {

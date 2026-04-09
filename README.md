@@ -10,6 +10,9 @@ A simple weather website built with HTML, CSS, and JavaScript that lets users se
 - Gulf capitals dropdown for quick selection
 - 5-day forecast
 - Weather icons for current conditions and forecast
+- Dynamic background based on weather condition
+- Weather alerts for extreme conditions
+- Search suggestions while typing
 - Dark mode toggle
 - Arabic/English language switch with RTL support
 - Favorite cities saved in the browser
