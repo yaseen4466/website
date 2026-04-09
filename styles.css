@@ -330,6 +330,21 @@ h1 {
   transition: transform 140ms ease, opacity 140ms ease;
 }
 
+.site-footer {
+  margin-top: 28px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(110, 159, 202, 0.16);
+}
+
+.footer-credit {
+  margin: 0;
+  text-align: center;
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+}
+
 .forecast-grid {
   margin-top: 16px;
   display: grid;
