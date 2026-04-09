@@ -72,9 +72,15 @@ body.dark-mode {
   box-sizing: border-box;
 }
 
+html {
+  min-height: 100%;
+  background-color: var(--bg-bottom);
+}
+
 body {
   margin: 0;
   min-height: 100vh;
+  background-color: var(--bg-bottom);
   font-family: "Plus Jakarta Sans", sans-serif;
   color: var(--text-main);
   background:
