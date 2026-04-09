@@ -1,5 +1,6 @@
 const WEATHER_ENDPOINT =
   "https://api.open-meteo.com/v1/forecast?latitude=26.2235&longitude=50.5876&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=auto";
+const REQUEST_TIMEOUT_MS = 8000;
 
 const statusElement = document.getElementById("status");
 const weatherContent = document.getElementById("weather-content");
@@ -73,9 +74,13 @@ async function loadWeather() {
   setStatus("Loading current weather...");
   retryButton.classList.add("hidden");
   weatherContent.classList.add("hidden");
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
   try {
-    const response = await fetch(WEATHER_ENDPOINT);
+    const response = await fetch(WEATHER_ENDPOINT, {
+      signal: controller.signal,
+    });
 
     if (!response.ok) {
       throw new Error(`Weather request failed with status ${response.status}`);
@@ -91,6 +96,8 @@ async function loadWeather() {
   } catch (error) {
     console.error("Failed to load Bahrain weather:", error);
     showError();
+  } finally {
+    window.clearTimeout(timeoutId);
   }
 }
 

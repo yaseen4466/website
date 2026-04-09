@@ -5,33 +5,56 @@ A simple weather website built with HTML, CSS, and JavaScript that shows the cur
 ## Features
 
 - Clean modern layout
-- Current weather for Bahrain
-- Displays location, temperature, condition, humidity, and wind speed
+- Current weather only
+- Displays Bahrain location, temperature, condition, humidity, and wind speed
 - Loading state while data is being fetched
-- Error handling when the weather request fails
+- Error handling with a retry button when the weather request fails
+- Works when served from `localhost`
 
-## Project Files
+## Files
 
 - `index.html` - page structure
 - `styles.css` - styling and responsive layout
 - `script.js` - weather fetch logic and UI updates
 
-## How to Run
+## Run Locally
 
-1. Clone the repository.
-2. Open the project folder.
-3. Start a simple local server from the project directory.
+Run the site from a local server so it opens through `localhost`.
 
-Example commands:
+### Option 1: Python 3
 
 ```bash
+git clone https://github.com/yaseen4466/website.git
+cd website
+git checkout feature/bahrain-weather-site
 python3 -m http.server 8000
 ```
 
-Then open [http://localhost:8000](http://localhost:8000) in your browser.
+Open:
 
-You can also open `index.html` directly in a browser, but using a local server is recommended.
+```text
+http://localhost:8000
+```
+
+### Option 2: Node.js
+
+If you already have Node.js installed:
+
+```bash
+git clone https://github.com/yaseen4466/website.git
+cd website
+git checkout feature/bahrain-weather-site
+npx serve .
+```
+
+Open the localhost URL shown in the terminal.
+
+## Expected Behavior
+
+- The page first shows `Loading current weather...`
+- After the API responds, the page shows the Bahrain weather details
+- If the request fails or times out, the page shows an error message and a `Try Again` button
 
 ## Weather Data
 
-The app uses the Open-Meteo API to fetch current weather data for Bahrain without requiring an API key.
+The app uses the Open-Meteo API for current Bahrain weather data and does not require an API key.
