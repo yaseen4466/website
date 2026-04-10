@@ -16,7 +16,6 @@ A simple weather website built with HTML, CSS, and JavaScript that lets users se
 - Dark mode toggle
 - Arabic/English language switch with RTL support
 - Favorite cities saved in the browser
-- Auto-detect current location
 - Displays location, temperature, condition, humidity, and wind speed
 - Loading state while data is being fetched
 - Error handling with a retry button when the weather request fails
@@ -27,7 +26,7 @@ A simple weather website built with HTML, CSS, and JavaScript that lets users se
 
 - `index.html` - page structure
 - `styles.css` - styling and responsive layout
-- `script.js` - geocoding lookup, 5-day forecast logic, icons, auto-location, and theme/favorites persistence
+- `script.js` - geocoding lookup, city-name normalization, 5-day forecast logic, icons, and theme/favorites persistence
 
 ## Run Locally
 
@@ -38,7 +37,7 @@ Run the site from a local server so it opens through `localhost`.
 ```bash
 git clone https://github.com/yaseen4466/website.git
 cd website
-git checkout feature/bahrain-weather-site
+git checkout main
 python3 -m http.server 8000
 ```
 
@@ -55,7 +54,7 @@ If you already have Node.js installed:
 ```bash
 git clone https://github.com/yaseen4466/website.git
 cd website
-git checkout feature/bahrain-weather-site
+git checkout main
 npx serve .
 ```
 
@@ -64,8 +63,8 @@ Open the localhost URL shown in the terminal.
 ## Expected Behavior
 
 - The page first shows `Loading current weather...`
-- The app tries to detect the user's current location on load and can also use the location button
 - Selecting a Gulf capital loads its weather directly
+- Arabic Gulf capital names are normalized to English before calling the API
 - After the API responds, the page shows the searched city's weather details
 - The app also shows a 5-day forecast with weather icons
 - Language switching between English and Arabic is saved in the browser

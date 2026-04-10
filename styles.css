@@ -274,7 +274,7 @@ h1 {
 
 .search-controls {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 12px;
 }
 
@@ -293,10 +293,6 @@ h1 {
   font-weight: 700;
   cursor: pointer;
   transition: transform 140ms ease, opacity 140ms ease, background 140ms ease;
-}
-
-.location-button {
-  white-space: nowrap;
 }
 
 .search-button {
