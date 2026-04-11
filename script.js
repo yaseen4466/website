@@ -70,7 +70,7 @@ const cityAliasMap = {
   "abu dhabi, uae": "Abu Dhabi",
   أبوظبي: "Abu Dhabi",
   "أبوظبي، الإمارات": "Abu Dhabi",
-  "ابوظبي": "Abu Dhabi",
+  ابوظبي: "Abu Dhabi",
 };
 
 const translations = {
@@ -102,6 +102,13 @@ const translations = {
     waitingStory: "1. Waiting for weather details",
     retry: "Try Again",
     footer: "Built by Yaseen Mohamed",
+    assistantTitle: "AI Weather Assistant",
+    assistantLabel: "Ask about the weather",
+    assistantPlaceholder: "Ask in Arabic or English",
+    assistantButton: "Ask",
+    assistantIdle: "Ask anything about the weather and I will help.",
+    assistantNoWeather:
+      "Load a city first, then I can answer questions about the current weather.",
     error:
       "Unable to load weather for {city} right now. Please check your input and try again.",
     cityNotFound: "No weather results were found for {city}. Try the English city name instead.",
@@ -148,6 +155,13 @@ const translations = {
     waitingStory: "1. بانتظار تفاصيل الطقس",
     retry: "حاول مرة أخرى",
     footer: "تم التطوير بواسطة Yaseen Mohamed",
+    assistantTitle: "مساعد الطقس الذكي",
+    assistantLabel: "اسأل عن الطقس",
+    assistantPlaceholder: "اكتب سؤالك بالعربي أو الإنجليزي",
+    assistantButton: "اسأل",
+    assistantIdle: "اسأل أي سؤال عن الطقس وسأحاول أفيدك.",
+    assistantNoWeather:
+      "حمّل مدينة أولًا وبعدها أقدر أجاوبك حسب حالة الطقس الحالية.",
     error:
       "تعذر تحميل الطقس لـ {city} الآن. يرجى التحقق من الإدخال والمحاولة مرة أخرى.",
     cityNotFound: "لم يتم العثور على نتائج طقس للمدينة {city}. جرّب كتابة الاسم بالإنجليزية.",
@@ -199,6 +213,244 @@ const weatherCodeMap = {
   99: { en: "Thunderstorm with heavy hail", ar: "عاصفة رعدية مع برد كثيف" },
 };
 
+const assistantIntents = {
+  generalWeather: {
+    ar: {
+      phrases: [
+        "هل الطقس كويس",
+        "الجو حلو",
+        "الجو مناسب",
+        "الطقس عامل ايه",
+        "عامل ايه الطقس",
+        "كيف الطقس",
+        "كيف الجو",
+        "الجو كويس",
+        "الجو ازاي",
+      ],
+      keywordGroups: [
+        ["الطقس", "كويس"],
+        ["الجو", "حلو"],
+        ["الجو", "مناسب"],
+        ["الطقس", "عامل"],
+      ],
+    },
+    en: {
+      phrases: [
+        "is the weather good",
+        "is the weather nice",
+        "how is the weather",
+        "is it okay outside",
+        "hows the weather",
+        "weather good",
+      ],
+      keywordGroups: [
+        ["weather", "good"],
+        ["weather", "nice"],
+        ["how", "weather"],
+        ["okay", "outside"],
+      ],
+    },
+  },
+  goingOutside: {
+    ar: {
+      phrases: [
+        "ينفع اخرج",
+        "مناسب للخروج",
+        "اقدر انزل",
+        "هل الوقت مناسب اطلع",
+        "هل اقدر اخرج",
+        "اخرج ولا لا",
+      ],
+      keywordGroups: [
+        ["اخرج"],
+        ["اقدر", "انزل"],
+        ["مناسب", "للخروج"],
+        ["وقت", "مناسب", "اطلع"],
+      ],
+    },
+    en: {
+      phrases: [
+        "can i go out",
+        "is it good to go outside",
+        "is it suitable to go out",
+        "should i go outside",
+        "can i go outside",
+      ],
+      keywordGroups: [
+        ["go", "out"],
+        ["go", "outside"],
+        ["suitable", "go", "out"],
+        ["should", "outside"],
+      ],
+    },
+  },
+  clothing: {
+    ar: {
+      phrases: [
+        "البس ايه",
+        "محتاج جاكيت",
+        "لبس شتوي ولا صيفي",
+        "البس ماذا",
+        "احتاج جاكيت",
+      ],
+      keywordGroups: [
+        ["البس"],
+        ["محتاج", "جاكيت"],
+        ["لبس", "شتوي"],
+        ["لبس", "صيفي"],
+      ],
+    },
+    en: {
+      phrases: [
+        "what should i wear",
+        "do i need a jacket",
+        "should i wear something warm",
+        "what do i wear",
+      ],
+      keywordGroups: [
+        ["what", "wear"],
+        ["need", "jacket"],
+        ["wear", "warm"],
+      ],
+    },
+  },
+  activity: {
+    ar: {
+      phrases: [
+        "ينفع اتمشى",
+        "ينفع اجري",
+        "مناسب للرياضة",
+        "ينفع امشي",
+        "مناسب للمشي",
+        "مناسب للجري",
+      ],
+      keywordGroups: [
+        ["اتمشى"],
+        ["اجري"],
+        ["مناسب", "للرياضة"],
+        ["مناسب", "للمشي"],
+      ],
+    },
+    en: {
+      phrases: [
+        "is it good for walking",
+        "is it good for running",
+        "is it good for exercise",
+        "good for walking",
+        "good for running",
+      ],
+      keywordGroups: [
+        ["walking"],
+        ["running"],
+        ["exercise"],
+        ["good", "walking"],
+      ],
+    },
+  },
+  conditions: {
+    ar: {
+      phrases: [
+        "فيه مطر",
+        "الجو حر",
+        "الجو برد",
+        "في رياح",
+        "فيه هوا",
+        "حر ولا لا",
+        "برد ولا لا",
+      ],
+      keywordGroups: [
+        ["مطر"],
+        ["حر"],
+        ["برد"],
+        ["رياح"],
+        ["هوا"],
+      ],
+    },
+    en: {
+      phrases: [
+        "is it raining",
+        "is it hot",
+        "is it cold",
+        "is it windy",
+        "is it raining outside",
+      ],
+      keywordGroups: [
+        ["raining"],
+        ["hot"],
+        ["cold"],
+        ["windy"],
+      ],
+    },
+  },
+};
+
+const assistantTemplates = {
+  ar: {
+    generalWeather: [
+      (w) => `الجو اليوم ${w.condition} ودرجة الحرارة ${w.temperature}°C، وبصراحة ${w.isPleasant ? "الأجواء تبدو مريحة" : w.isHot ? "يميل للحر" : w.isCold ? "يميل للبرودة" : "مقبولة"} 😊`,
+      (w) => `حاليًا الطقس ${w.condition} مع ${w.temperature}°C، والوضع ${w.isWindy ? "مقبول لكن فيه شوية رياح" : "جيد بشكل عام"} 🌤️`,
+      (w) => `الطقس الآن ${w.condition}، والحرارة ${w.temperature}°C، وممكن أقول إنه ${w.isRainy ? "مو أفضل وقت" : "كويس إلى حد كبير"} 👍`,
+    ],
+    goingOutside: [
+      (w) => `نعم، تقدر تخرج ${w.isRainy ? "لكن خذ احتياطك من المطر" : w.isWindy ? "بس انتبه للرياح" : "والأجواء مناسبة غالبًا"} 🚶`,
+      (w) => `الخروج ${w.isHot ? "ممكن لكن الأفضل تتجنب وقت الحر" : w.isCold ? "مناسب مع لبس أدفى شوي" : "يبدو مناسبًا الآن"} 🙂`,
+      (w) => `إذا عندك مشوار، ينفع ${w.isRainy ? "لكن الجو فيه احتمال بلل" : "بشكل عام الجو يساعد"} ${w.isWindy ? "والهواء واضح اليوم" : "✨"}`,
+    ],
+    clothing: [
+      (w) => `البس ${w.isHot ? "ملابس خفيفة ومريحة" : w.isCold ? "شيئًا دافئًا أو جاكيت خفيف" : "لبسًا يوميًا مريحًا"} ${w.isWindy ? "وممكن تحتاج طبقة خفيفة مع الهواء" : "👕"}`,
+      (w) => `أنسب شيء اليوم هو ${w.isHot ? "لبس صيفي خفيف" : w.isCold ? "جاكيت خفيف أو شيء دافئ" : "ملابس عادية مريحة"} ${w.isRainy ? "ومظلة لو أمكن ☔" : "🙂"}`,
+      (w) => `${w.isCold ? "نعم، الجاكيت فكرة جيدة" : w.isHot ? "لا يبدو أنك تحتاج جاكيت" : "جاكيت خفيف يكفي لو تحب"} ${w.isWindy ? "لأن الجو فيه هوا شوي" : "🧥"}`,
+    ],
+    activity: [
+      (w) => `للمشي أو الرياضة الخفيفة، الجو ${w.isRainy ? "ليس الأفضل الآن بسبب المطر" : w.isHot ? "مقبول لكن ليس مثاليًا وقت الحر" : w.isWindy ? "جيد مع الانتباه للهواء" : "جيد جدًا"} 🏃`,
+      (w) => `${w.isPleasant ? "نعم، مناسب للمشي والتمشية" : w.isCold ? "ينفع لكن خذ طبقة دافئة" : w.isHot ? "يفضل نشاط خفيف فقط" : "مقبول عمومًا"} 🚶`,
+      (w) => `للرياضة: ${w.isRainy ? "أجلها قليلًا إذا كنت ستتمرن بالخارج" : w.isWindy ? "ممكن، لكن الرياح ملحوظة" : "الظروف تبدو مناسبة"} 💪`,
+    ],
+    conditions: [
+      (w) => `الجو ${w.isHot ? "حار" : w.isCold ? "بارد نسبيًا" : "معتدل"}، والرياح ${w.isWindy ? "ملحوظة" : "خفيفة إلى متوسطة"}، ${w.isRainy ? "وفيه أجواء مطر" : "ولا يظهر مطر حاليًا"} 🌦️`,
+      (w) => `${w.isRainy ? "نعم، شكل الطقس فيه مطر أو رذاذ" : "لا يبدو أن هناك مطر الآن"}، والحرارة ${w.temperature}°C ${w.isWindy ? "مع رياح واضحة" : "🙂"}`,
+      (w) => `لو سؤالك عن الحر أو البرد: الجو الآن ${w.isHot ? "حار" : w.isCold ? "بارد شوي" : "معتدل"}، ومع رياح ${w.isWindy ? "واضحة" : "عادية"} 🌡️`,
+    ],
+    fallback: [
+      (w) => `الطقس الآن ${w.condition} مع ${w.temperature}°C، والرطوبة ${w.humidity}% والرياح ${w.wind} كم/س. بشكل عام ${w.isPleasant ? "الوضع مريح" : w.isHot ? "يميل للحر" : w.isCold ? "يميل للبرودة" : "مقبول"} 🙂`,
+      (w) => `حاليًا عندك ${w.condition}، حرارة ${w.temperature}°C، ورطوبة ${w.humidity}%، والجو ${w.isWindy ? "فيه هواء واضح" : "هادئ نسبيًا"} 🌤️`,
+    ],
+  },
+  en: {
+    generalWeather: [
+      (w) => `The weather is ${w.condition.toLowerCase()} at ${w.temperature}°C, and overall it feels ${w.isPleasant ? "pretty comfortable" : w.isHot ? "quite warm" : w.isCold ? "a bit cool" : "fairly okay"} 😊`,
+      (w) => `Right now it is ${w.condition.toLowerCase()} with ${w.temperature}°C, so the weather looks ${w.isRainy ? "a little tricky" : "generally nice"} 🌤️`,
+      (w) => `It feels ${w.condition.toLowerCase()} today, and I would say the weather is ${w.isWindy ? "good but a little breezy" : "pleasant overall"} 👍`,
+    ],
+    goingOutside: [
+      (w) => `Yes, you can go outside ${w.isRainy ? "but take care because it looks wet" : w.isWindy ? "just keep the wind in mind" : "and it should feel fine"} 🚶`,
+      (w) => `Going out looks ${w.isHot ? "okay, but hotter parts of the day may feel tiring" : w.isCold ? "fine if you dress a little warmer" : "pretty suitable right now"} 🙂`,
+      (w) => `If you have plans, outside conditions seem ${w.isRainy ? "less ideal because of the rain" : "good overall"} ${w.isWindy ? "with noticeable wind" : "✨"}`,
+    ],
+    clothing: [
+      (w) => `You should wear ${w.isHot ? "light, breathable clothes" : w.isCold ? "something warm or a light jacket" : "regular comfortable clothes"} ${w.isWindy ? "with an extra light layer if you want" : "👕"}`,
+      (w) => `${w.isCold ? "A jacket would be a good idea" : w.isHot ? "You probably do not need a jacket" : "A light layer should be enough"} ${w.isRainy ? "and an umbrella could help ☔" : "🧥"}`,
+      (w) => `Today calls for ${w.isHot ? "summer-style clothing" : w.isCold ? "a warmer outfit" : "a simple comfortable outfit"} ${w.isWindy ? "because it is a bit breezy" : "🙂"}`,
+    ],
+    activity: [
+      (w) => `For walking or exercise, the weather is ${w.isRainy ? "not the best right now because of rain" : w.isHot ? "okay, but harder in the heat" : w.isWindy ? "good if you do not mind some wind" : "quite good"} 🏃`,
+      (w) => `${w.isPleasant ? "Yes, it looks good for a walk" : w.isCold ? "Yes, just wear something slightly warmer" : w.isHot ? "You can, but lighter activity may feel better" : "It should be fine overall"} 🚶`,
+      (w) => `For outdoor activity, conditions seem ${w.isRainy ? "a little inconvenient" : "fairly suitable"} ${w.isWindy ? "with some noticeable breeze" : "💪"}`,
+    ],
+    conditions: [
+      (w) => `It is ${w.isHot ? "hot" : w.isCold ? "a bit cold" : "moderate"}, the wind is ${w.isWindy ? "noticeable" : "light to moderate"}, and ${w.isRainy ? "there may be rain around" : "it does not look rainy right now"} 🌦️`,
+      (w) => `${w.isRainy ? "Yes, it looks rainy or drizzly right now" : "It does not seem to be raining right now"}, and the temperature is ${w.temperature}°C ${w.isWindy ? "with some wind" : "🙂"}`,
+      (w) => `If you mean hot or cold, it feels ${w.isHot ? "hot" : w.isCold ? "a little chilly" : "fairly mild"} right now, with ${w.isWindy ? "clear wind" : "normal wind"} 🌡️`,
+    ],
+    fallback: [
+      (w) => `Right now it is ${w.condition.toLowerCase()} with ${w.temperature}°C, humidity at ${w.humidity}%, and wind around ${w.wind} km/h. Overall it feels ${w.isPleasant ? "comfortable" : w.isHot ? "warm" : w.isCold ? "cool" : "fairly okay"} 🙂`,
+      (w) => `Current weather looks ${w.condition.toLowerCase()}, with ${w.temperature}°C and wind at ${w.wind} km/h. It feels ${w.isWindy ? "a bit breezy" : "pretty steady"} overall 🌤️`,
+    ],
+  },
+};
+
+const rainyCodes = [51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82];
+
 const statusElement = document.getElementById("status");
 const weatherContent = document.getElementById("weather-content");
 const retryButton = document.getElementById("retry-button");
@@ -219,6 +471,10 @@ const temperatureElement = document.getElementById("temperature");
 const conditionElement = document.getElementById("condition");
 const humidityElement = document.getElementById("humidity");
 const windSpeedElement = document.getElementById("wind-speed");
+const assistantForm = document.getElementById("assistant-form");
+const assistantInput = document.getElementById("assistant-input");
+const assistantButton = document.getElementById("assistant-button");
+const assistantResponseElement = document.getElementById("assistant-response");
 const toolbarLabel = document.querySelector(".toolbar-label");
 const eyebrowElement = document.querySelector(".eyebrow");
 const weatherTitleElement = document.getElementById("weather-title");
@@ -227,6 +483,8 @@ const capitalLabelElement = document.querySelector('label[for="capital-select"]'
 const searchLabelElement = document.querySelector('label[for="city-input"]');
 const favoritesTitleElement = document.getElementById("favorites-title");
 const weatherStoryTitleElement = document.getElementById("weather-story-title");
+const assistantTitleElement = document.getElementById("assistant-title");
+const assistantLabelElement = document.querySelector('label[for="assistant-input"]');
 const weatherStoryElement = document.getElementById("weather-story");
 const forecastTitleElement = document.getElementById("forecast-title");
 const footerCreditElement = document.querySelector(".footer-credit");
@@ -242,17 +500,14 @@ let currentResolvedCity = null;
 let favoriteCities = loadFavoriteCities();
 let suggestionDebounceId = null;
 let suggestionsAbortController = null;
+let lastAssistantQuestion = "";
 
 function isArabicText(value) {
   return /[\u0600-\u06FF]/.test(value);
 }
 
 function normalizeQueryValue(value) {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, " ")
-    .replace(/،/g, ",");
+  return value.trim().toLowerCase().replace(/\s+/g, " ").replace(/،/g, ",");
 }
 
 function mapCityNameToEnglish(cityName) {
@@ -279,6 +534,21 @@ function resolveCityQuery(cityName) {
   };
 }
 
+function normalizeAssistantText(value) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[؟?!.,;:()\[\]{}"'`~@#$%^&*_+=\\/|-]+/g, " ")
+    .replace(/[أإآ]/g, "ا")
+    .replace(/ى/g, "ي")
+    .replace(/ة/g, "ه")
+    .replace(/\s+/g, " ");
+}
+
+function detectQuestionLanguage(text) {
+  return isArabicText(text) ? "ar" : "en";
+}
+
 function t(key, values = {}) {
   const template = translations[currentLanguage][key] || translations.en[key] || "";
 
@@ -290,6 +560,11 @@ function t(key, values = {}) {
 function localizeWeatherCode(code) {
   const condition = weatherCodeMap[code];
   return condition ? condition[currentLanguage] || condition.en : "";
+}
+
+function getConditionForLanguage(code, language) {
+  const condition = weatherCodeMap[code];
+  return condition ? condition[language] || condition.en : "";
 }
 
 function getWeatherIcon(code) {
@@ -503,6 +778,57 @@ function renderAlerts(current, daily) {
   alertBanner.classList.remove("hidden");
 }
 
+function getWeatherSnapshot(language) {
+  if (!currentResolvedCity?.currentWeather) {
+    return null;
+  }
+
+  const current = currentResolvedCity.currentWeather;
+  const temperature = Math.round(current.temperature_2m);
+  const humidity = Number(current.relative_humidity_2m);
+  const wind = Math.round(current.wind_speed_10m);
+  const code = current.weather_code;
+
+  return {
+    cityName: currentResolvedCity.name,
+    temperature,
+    humidity,
+    wind,
+    code,
+    condition: getConditionForLanguage(code, language) || getConditionForLanguage(code, "en"),
+    isHot: temperature >= 34,
+    isCold: temperature <= 18,
+    isPleasant: temperature >= 20 && temperature <= 31 && wind < 30 && !rainyCodes.includes(code),
+    isWindy: wind >= 30,
+    isHumid: humidity >= 70,
+    isRainy: rainyCodes.includes(code),
+  };
+}
+
+function chooseRandom(items) {
+  return items[Math.floor(Math.random() * items.length)];
+}
+
+function matchesIntent(normalizedText, config) {
+  return (
+    config.phrases.some((phrase) => normalizedText.includes(phrase)) ||
+    config.keywordGroups.some((group) => group.every((term) => normalizedText.includes(term)))
+  );
+}
+
+function detectAssistantIntent(question, language) {
+  const normalizedText = normalizeAssistantText(question);
+
+  for (const [intent, languages] of Object.entries(assistantIntents)) {
+    const config = languages[language] || languages.en;
+    if (matchesIntent(normalizedText, config)) {
+      return intent;
+    }
+  }
+
+  return "fallback";
+}
+
 function generateWeatherMessage({ temp, condition, humidity, wind }) {
   const temperature = Number(temp);
   const moisture = Number(humidity);
@@ -582,6 +908,20 @@ function renderWeatherStory(current) {
   });
 }
 
+function answerAssistantQuestion(question) {
+  const language = detectQuestionLanguage(question);
+  const weather = getWeatherSnapshot(language);
+
+  if (!weather) {
+    assistantResponseElement.textContent = translations[language].assistantNoWeather;
+    return;
+  }
+
+  const intent = detectAssistantIntent(question, language);
+  const templates = assistantTemplates[language][intent] || assistantTemplates[language].fallback;
+  assistantResponseElement.textContent = chooseRandom(templates)(weather);
+}
+
 function updateStaticTranslations() {
   document.documentElement.lang = currentLanguage;
   document.documentElement.dir = currentLanguage === "ar" ? "rtl" : "ltr";
@@ -602,6 +942,11 @@ function updateStaticTranslations() {
   searchButton.textContent = t("searchButton");
   favoritesTitleElement.textContent = t("favoritesTitle");
   weatherStoryTitleElement.textContent = t("weatherNoteTitle");
+  assistantTitleElement.textContent = t("assistantTitle");
+  assistantLabelElement.textContent = t("assistantLabel");
+  assistantInput.placeholder = t("assistantPlaceholder");
+  assistantInput.setAttribute("aria-label", t("assistantLabel"));
+  assistantButton.textContent = t("assistantButton");
   saveFavoriteButton.textContent = t("saveFavorite");
   forecastTitleElement.textContent = t("forecastTitle");
   retryButton.textContent = t("retry");
@@ -619,6 +964,10 @@ function updateStaticTranslations() {
     conditionElement.textContent = t("waiting");
     weatherStoryElement.textContent = t("waitingStory");
   }
+
+  assistantResponseElement.textContent = lastAssistantQuestion
+    ? assistantResponseElement.textContent
+    : t("assistantIdle");
 }
 
 function animateLanguageSwitch(language) {
@@ -641,6 +990,12 @@ function animateLanguageSwitch(language) {
     renderWeatherStory(currentResolvedCity.currentWeather);
     renderForecast(currentResolvedCity.dailyForecast);
     renderAlerts(currentResolvedCity.currentWeather, currentResolvedCity.dailyForecast);
+  }
+
+  if (lastAssistantQuestion) {
+    answerAssistantQuestion(lastAssistantQuestion);
+  } else {
+    assistantResponseElement.textContent = t("assistantIdle");
   }
 
   window.setTimeout(() => {
@@ -668,6 +1023,12 @@ function showWeather(city, data) {
   renderForecast(data.daily);
   renderAlerts(current, data.daily);
   applyWeatherTheme(current.weather_code);
+
+  if (lastAssistantQuestion) {
+    answerAssistantQuestion(lastAssistantQuestion);
+  } else {
+    assistantResponseElement.textContent = t("assistantIdle");
+  }
 
   weatherContent.classList.remove("hidden");
   retryButton.classList.add("hidden");
@@ -855,6 +1216,18 @@ searchForm.addEventListener("submit", (event) => {
   hideSuggestions();
 });
 
+assistantForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  lastAssistantQuestion = assistantInput.value.trim();
+
+  if (!lastAssistantQuestion) {
+    assistantResponseElement.textContent = t("assistantIdle");
+    return;
+  }
+
+  answerAssistantQuestion(lastAssistantQuestion);
+});
+
 retryButton.addEventListener("click", loadWeather);
 
 themeToggle.addEventListener("click", () => {
@@ -969,6 +1342,7 @@ async function initializeApp() {
   languageSelect.value = currentLanguage;
   updateStaticTranslations();
   initializeTheme();
+  assistantResponseElement.textContent = t("assistantIdle");
   await loadWeather({
     mode: "search",
     value: DEFAULT_CITY_QUERY,

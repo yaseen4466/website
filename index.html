@@ -130,6 +130,31 @@
             </div>
           </section>
 
+          <section class="assistant-panel" aria-labelledby="assistant-title">
+            <div class="forecast-header">
+              <h2 id="assistant-title" class="section-title">AI Weather Assistant</h2>
+            </div>
+            <form id="assistant-form" class="assistant-form">
+              <label class="select-label" for="assistant-input">Ask about the weather</label>
+              <div class="search-controls">
+                <input
+                  id="assistant-input"
+                  class="city-input"
+                  type="text"
+                  placeholder="Ask in Arabic or English"
+                  autocomplete="off"
+                  aria-label="Ask about the weather"
+                />
+                <button id="assistant-button" class="search-button" type="submit">
+                  Ask
+                </button>
+              </div>
+            </form>
+            <div id="assistant-response" class="assistant-response">
+              Ask anything about the weather and I will help.
+            </div>
+          </section>
+
           <section class="forecast-panel" aria-labelledby="forecast-title">
             <div class="forecast-header">
               <h2 id="forecast-title" class="section-title">5-Day Forecast</h2>
