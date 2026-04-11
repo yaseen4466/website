@@ -265,7 +265,8 @@ h1 {
 }
 
 .favorites-panel,
-.forecast-panel {
+.forecast-panel,
+.weather-story-panel {
   padding: 20px;
   border-radius: 20px;
   background: var(--surface-soft);
@@ -499,6 +500,17 @@ h1 {
   color: var(--text-strong);
 }
 
+.weather-story {
+  margin-top: 16px;
+  padding: 18px;
+  border-radius: 18px;
+  background: var(--surface-strong);
+  border: 1px solid var(--surface-border);
+  color: var(--text-main);
+  line-height: 1.9;
+  white-space: pre-line;
+}
+
 .retry-button {
   margin-top: 20px;
   padding: 12px 18px;
@@ -588,6 +600,7 @@ html[dir="rtl"] .weather-card,
 html[dir="rtl"] .hero-copy,
 html[dir="rtl"] .favorites-panel,
 html[dir="rtl"] .forecast-panel,
+html[dir="rtl"] .weather-story-panel,
 html[dir="rtl"] .primary-stat,
 html[dir="rtl"] .metric,
 html[dir="rtl"] .site-footer {

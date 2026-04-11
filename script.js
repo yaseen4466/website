@@ -96,8 +96,10 @@ const translations = {
     detailsLabel: "Current weather details",
     humidity: "Humidity",
     windSpeed: "Wind Speed",
+    weatherNoteTitle: "Weather Note",
     forecastTitle: "5-Day Forecast",
     waiting: "Waiting for data",
+    waitingStory: "1. Waiting for weather details",
     retry: "Try Again",
     footer: "Built by Yaseen Mohamed",
     error:
@@ -140,8 +142,10 @@ const translations = {
     detailsLabel: "تفاصيل الطقس الحالية",
     humidity: "الرطوبة",
     windSpeed: "سرعة الرياح",
+    weatherNoteTitle: "ملاحظة سريعة",
     forecastTitle: "توقعات 5 أيام",
     waiting: "بانتظار البيانات",
+    waitingStory: "1. بانتظار تفاصيل الطقس",
     retry: "حاول مرة أخرى",
     footer: "تم التطوير بواسطة Yaseen Mohamed",
     error:
@@ -222,6 +226,8 @@ const introElement = document.querySelector(".intro");
 const capitalLabelElement = document.querySelector('label[for="capital-select"]');
 const searchLabelElement = document.querySelector('label[for="city-input"]');
 const favoritesTitleElement = document.getElementById("favorites-title");
+const weatherStoryTitleElement = document.getElementById("weather-story-title");
+const weatherStoryElement = document.getElementById("weather-story");
 const forecastTitleElement = document.getElementById("forecast-title");
 const footerCreditElement = document.querySelector(".footer-credit");
 const metricLabels = document.querySelectorAll(".metric-label");
@@ -497,6 +503,53 @@ function renderAlerts(current, daily) {
   alertBanner.classList.remove("hidden");
 }
 
+function generateWeatherMessage({ temp, condition, humidity, wind }) {
+  const temperature = Number(temp);
+  const moisture = Number(humidity);
+  const breeze = Number(wind);
+
+  const simpleExplanation =
+    temperature >= 35
+      ? `1. الجو اليوم ${condition} وحار بوضوح عند ${temperature}°C ☀️`
+      : temperature <= 18
+        ? `1. الجو اليوم ${condition} ومائل للبرودة عند ${temperature}°C 🌥️`
+        : `1. الجو اليوم ${condition} ومعتدل ولطيف عند ${temperature}°C 🌤️`;
+
+  const goingOutsideAdvice =
+    breeze >= 35
+      ? "2. تقدر تطلع، لكن الرياح قوية شوي فخلك منتبه 💨"
+      : temperature >= 38
+        ? "2. إذا بتطلع، الأفضل يكون المشوار خفيف أو بوقت أهدأ من النهار 🕶️"
+        : "2. الأجواء مناسبة للخروج غالبًا إذا عندك مشوار 🚶";
+
+  const whatToWear =
+    temperature >= 32
+      ? "3. البس شيء خفيف ومريح، ونظارة شمسية بتفيدك 👕"
+      : temperature <= 18
+        ? "3. جاكيت خفيف أو قطعة دافئة بيكونوا مناسبين 🧥"
+        : "3. ملابس يومية مريحة كفاية لليوم 👟";
+
+  const helpfulTip =
+    moisture >= 70
+      ? "4. الرطوبة مرتفعة، فاشرب ماء كثير وخلك بمكان فيه تهوية جيدة 💧"
+      : breeze >= 35
+        ? "4. ثبت أغراضك الخفيفة إذا كنت خارج البيت لأن الهواء نشيط اليوم 🌬️"
+        : "4. خذ معك ماء بسيط لو ناوي تبقى بره لفترة 🌿";
+
+  return [simpleExplanation, goingOutsideAdvice, whatToWear, helpfulTip].join("\n");
+}
+
+function renderWeatherStory(current) {
+  const localizedCondition = localizeWeatherCode(current.weather_code) || t("waiting");
+
+  weatherStoryElement.textContent = generateWeatherMessage({
+    temp: Math.round(current.temperature_2m),
+    condition: localizedCondition,
+    humidity: current.relative_humidity_2m,
+    wind: Math.round(current.wind_speed_10m),
+  });
+}
+
 function updateStaticTranslations() {
   document.documentElement.lang = currentLanguage;
   document.documentElement.dir = currentLanguage === "ar" ? "rtl" : "ltr";
@@ -516,6 +569,7 @@ function updateStaticTranslations() {
   cityInput.setAttribute("aria-label", t("searchPlaceholder"));
   searchButton.textContent = t("searchButton");
   favoritesTitleElement.textContent = t("favoritesTitle");
+  weatherStoryTitleElement.textContent = t("weatherNoteTitle");
   saveFavoriteButton.textContent = t("saveFavorite");
   forecastTitleElement.textContent = t("forecastTitle");
   retryButton.textContent = t("retry");
@@ -531,6 +585,7 @@ function updateStaticTranslations() {
 
   if (!currentResolvedCity) {
     conditionElement.textContent = t("waiting");
+    weatherStoryElement.textContent = t("waitingStory");
   }
 }
 
@@ -551,6 +606,7 @@ function animateLanguageSwitch(language) {
     locationElement.textContent = currentResolvedCity.name;
     conditionElement.textContent = localizeWeatherCode(currentResolvedCity.weatherCode);
     conditionIconElement.textContent = getWeatherIcon(currentResolvedCity.weatherCode);
+    renderWeatherStory(currentResolvedCity.currentWeather);
     renderForecast(currentResolvedCity.dailyForecast);
     renderAlerts(currentResolvedCity.currentWeather, currentResolvedCity.dailyForecast);
   }
@@ -576,6 +632,7 @@ function showWeather(city, data) {
   conditionElement.textContent = localizeWeatherCode(current.weather_code) || t("waiting");
   humidityElement.textContent = `${current.relative_humidity_2m}%`;
   windSpeedElement.textContent = `${Math.round(current.wind_speed_10m)} km/h`;
+  renderWeatherStory(current);
   renderForecast(data.daily);
   renderAlerts(current, data.daily);
   applyWeatherTheme(current.weather_code);
