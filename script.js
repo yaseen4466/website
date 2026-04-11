@@ -508,6 +508,38 @@ function generateWeatherMessage({ temp, condition, humidity, wind }) {
   const moisture = Number(humidity);
   const breeze = Number(wind);
 
+  if (currentLanguage === "en") {
+    const simpleExplanation =
+      temperature >= 35
+        ? `1. Today feels ${condition.toLowerCase()} and clearly hot at ${temperature}°C ☀️`
+        : temperature <= 18
+          ? `1. Today feels ${condition.toLowerCase()} and a bit cool at ${temperature}°C 🌥️`
+          : `1. Today feels ${condition.toLowerCase()} and pleasantly mild at ${temperature}°C 🌤️`;
+
+    const goingOutsideAdvice =
+      breeze >= 35
+        ? "2. You can still head out, but the wind is pretty strong, so take care 💨"
+        : temperature >= 38
+          ? "2. If you're going out, keep it light and try a cooler part of the day 🕶️"
+          : "2. It looks like a pretty good day to be outside if you have plans 🚶";
+
+    const whatToWear =
+      temperature >= 32
+        ? "3. Light, breathable clothes will feel best, and sunglasses are a good idea 👕"
+        : temperature <= 18
+          ? "3. A light jacket or something a bit warm would be a good call 🧥"
+          : "3. Regular comfortable clothes should be just fine today 👟";
+
+    const helpfulTip =
+      moisture >= 70
+        ? "4. Humidity is high, so drink plenty of water and stay somewhere with good airflow 💧"
+        : breeze >= 35
+          ? "4. Keep loose items secure if you're outside because it is breezy today 🌬️"
+          : "4. Take a little water with you if you'll be out for a while 🌿";
+
+    return [simpleExplanation, goingOutsideAdvice, whatToWear, helpfulTip].join("\n");
+  }
+
   const simpleExplanation =
     temperature >= 35
       ? `1. الجو اليوم ${condition} وحار بوضوح عند ${temperature}°C ☀️`
