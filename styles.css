@@ -35,9 +35,9 @@
 
 body.dark-mode {
   color-scheme: dark;
-  --bg-top: #071822;
-  --bg-bottom: #102a38;
-  --card-bg: rgba(9, 23, 33, 0.9);
+  --bg-top: #1f2e3a;
+  --bg-bottom: #1f2e3a;
+  --card-bg: rgba(31, 46, 58, 0.96);
   --card-border: rgba(123, 178, 196, 0.24);
   --text-main: #ecf7ff;
   --text-muted: #b2cad6;
@@ -62,8 +62,8 @@ body.dark-mode {
   --alert-bg: rgba(255, 196, 87, 0.18);
   --alert-border: rgba(255, 196, 87, 0.22);
   --alert-text: #ffe4a8;
-  --weather-glow-left: rgba(71, 195, 178, 0.16);
-  --weather-glow-right: rgba(80, 146, 255, 0.14);
+  --weather-glow-left: rgba(71, 195, 178, 0.06);
+  --weather-glow-right: rgba(80, 146, 255, 0.05);
   --weather-overlay: transparent;
   --danger: #ffd1d1;
 }
