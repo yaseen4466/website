@@ -122,6 +122,17 @@ body.weather-snow {
   --weather-glow-right: rgba(152, 196, 235, 0.18);
 }
 
+body.dark-mode.weather-clear,
+body.dark-mode.weather-cloudy,
+body.dark-mode.weather-rain,
+body.dark-mode.weather-storm,
+body.dark-mode.weather-fog,
+body.dark-mode.weather-snow {
+  --weather-glow-left: rgba(0, 0, 0, 0);
+  --weather-glow-right: rgba(0, 0, 0, 0);
+  --weather-overlay: transparent;
+}
+
 html,
 body,
 .weather-card,
